@@ -3,6 +3,8 @@ package cn.jxufe.service;
 import cn.jxufe.model.dto.SeedDTO;
 import cn.jxufe.model.enums.LandType;
 import cn.jxufe.model.enums.SeedType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -38,7 +40,7 @@ public interface SeedService {
     SeedDTO getSeedById(Long seedId);
     
     // 获取所有种子
-    List<SeedDTO> getAllSeeds();
+    Page<SeedDTO> getAllSeeds(Pageable pageable);
     
     // 根据名称搜索种子
     List<SeedDTO> searchSeedsByName(String seedName);

@@ -25,7 +25,7 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     List<Player> findByGoldCoinsGreaterThan(long goldCoins);
 
     // 查找拥有特定种子的玩家
-    @Query("SELECT p FROM Player p JOIN p.ownedSeeds s WHERE s.seedId = :seedId")
+    @Query("SELECT p FROM Player p JOIN p.ownedSeeds s WHERE s.id = :seedId")
     List<Player> findPlayersWithSeed(@Param("seedId") Long seedId);
 
     // 查找按照经验值排序的所有玩家（排行榜功能）

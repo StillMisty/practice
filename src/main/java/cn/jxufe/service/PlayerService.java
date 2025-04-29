@@ -1,6 +1,8 @@
 package cn.jxufe.service;
 
 import cn.jxufe.model.dto.PlayerDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -35,7 +37,7 @@ public interface PlayerService {
     PlayerDTO getPlayerByUsername(String username);
     
     // 获取所有玩家
-    List<PlayerDTO> getAllPlayers();
+    Page<PlayerDTO> getAllPlayers(Pageable pageable);
     
     // 根据显示名称搜索玩家
     List<PlayerDTO> searchPlayersByDisplayName(String displayName);

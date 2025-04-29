@@ -10,6 +10,8 @@ import cn.jxufe.repository.SeedRepository;
 import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.GrowthCharacteristicService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,7 +47,7 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
                 .orElseThrow(() -> new ResourceNotFoundException("生长特性不存在，ID: " + id));
         
         // 如果更新时改变了种子
-        if (!existingCharacteristic.getSeed().getSeedId().equals(dto.getSeedId())) {
+        if (!existingCharacteristic.getSeed().getId().equals(dto.getSeedId())) {
             Seed newSeed = seedRepository.findById(dto.getSeedId())
                     .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + dto.getSeedId()));
             existingCharacteristic.setSeed(newSeed);
@@ -115,16 +117,15 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
 
     @Override
     @Transactional(readOnly = true)
-    public List<GrowthCharacteristicDTO> getAllGrowthCharacteristics() {
-        return growthCharacteristicRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public Page<GrowthCharacteristicDTO> getAllGrowthCharacteristics(Pageable pageable) {
+        return growthCharacteristicRepository.findAll(pageable)
+                .map(this::convertToDTO);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<GrowthCharacteristicDTO> getGrowthCharacteristicsBySeedId(Long seedId) {
-        return growthCharacteristicRepository.findBySeedSeedId(seedId).stream()
+        return growthCharacteristicRepository.findBySeedId(seedId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -149,7 +150,7 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
     @Transactional(readOnly = true)
     public GrowthCharacteristicDTO getGrowthCharacteristicBySeedIdAndStage(Long seedId, int growthStage) {
         GrowthCharacteristic characteristic = growthCharacteristicRepository
-                .findBySeedSeedIdAndGrowthStage(seedId, growthStage);
+                .findBySeedIdAndGrowthStage(seedId, growthStage);
         
         if (characteristic == null) {
             throw new ResourceNotFoundException(
@@ -204,7 +205,7 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
         dto.setImageOffsetX(characteristic.getImageOffsetX());
         dto.setImageOffsetY(characteristic.getImageOffsetY());
         dto.setCropStatus(characteristic.getCropStatus());
-        dto.setSeedId(characteristic.getSeed().getSeedId());
+        dto.setSeedId(characteristic.getSeed().getId());
         return dto;
     }
 

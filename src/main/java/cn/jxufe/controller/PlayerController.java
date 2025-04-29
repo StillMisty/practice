@@ -9,6 +9,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -67,9 +71,16 @@ public class PlayerController {
     }
 
     @GetMapping
-    @Operation(summary = "获取所有玩家", description = "获取系统中所有玩家的列表")
-    public ResponseEntity<List<PlayerDTO>> getAllPlayers() {
-        return ResponseEntity.ok(playerService.getAllPlayers());
+    @Operation(summary = "分页获取所有玩家", description = "获取系统中所有玩家的列表")
+    public ResponseEntity<Page<PlayerDTO>> getAllPlayers(
+            @Parameter(description = "页码，从0开始") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10")   int size,
+            @Parameter(description = "排序所依据的数据库中字段名") @RequestParam(defaultValue = "id") String sortBy,
+            @Parameter(description = "排序方向") Sort.Direction sortDirection
+    ) {
+        Sort sort = Sort.by(sortDirection, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return ResponseEntity.ok(playerService.getAllPlayers(pageable));
     }
 
     @GetMapping("/search")

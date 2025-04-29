@@ -68,7 +68,7 @@ public class GrowthCharacteristic {
     private CropStatus cropStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seed_id", nullable = false, referencedColumnName = "seed_id")
+    @JoinColumn(name = "seed_id", nullable = false, referencedColumnName = "id")
     @ToString.Exclude
     @Schema(description = "种子")
     private Seed seed;

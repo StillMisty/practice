@@ -13,7 +13,7 @@ import java.util.List;
 public interface GrowthCharacteristicRepository extends JpaRepository<GrowthCharacteristic, Long> {
 
     // 根据种子ID查找生长特性
-    List<GrowthCharacteristic> findBySeedSeedId(Long seedId);
+    List<GrowthCharacteristic> findBySeedId(Long seedId);
 
     // 根据生长阶段查找
     List<GrowthCharacteristic> findByGrowthStage(int growthStage);
@@ -22,7 +22,7 @@ public interface GrowthCharacteristicRepository extends JpaRepository<GrowthChar
     List<GrowthCharacteristic> findByCropStatus(CropStatus cropStatus);
 
     // 查找特定种子的特定生长阶段
-    GrowthCharacteristic findBySeedSeedIdAndGrowthStage(Long seedId, int growthStage);
+    GrowthCharacteristic findBySeedIdAndGrowthStage(Long seedId, int growthStage);
 
     // 查找虫害概率高于某阈值的生长特性
     List<GrowthCharacteristic> findByPestInfestationProbabilityGreaterThan(double probability);
@@ -31,6 +31,6 @@ public interface GrowthCharacteristicRepository extends JpaRepository<GrowthChar
     List<GrowthCharacteristic> findByGrowthStageTitleContaining(String title);
 
     // 查询特定种子的所有生长阶段，按阶段排序
-    @Query("SELECT gc FROM GrowthCharacteristic gc WHERE gc.seed.seedId = :seedId ORDER BY gc.growthStage ASC")
+    @Query("SELECT gc FROM GrowthCharacteristic gc WHERE gc.seed.id = :seedId ORDER BY gc.growthStage ASC")
     List<GrowthCharacteristic> findBySeedIdOrderByGrowthStageAsc(@Param("seedId") Long seedId);
 }

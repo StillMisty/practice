@@ -9,6 +9,8 @@ import cn.jxufe.repository.SeedRepository;
 import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.SeedService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -102,10 +104,9 @@ public class SeedServiceImpl implements SeedService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SeedDTO> getAllSeeds() {
-        return seedRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public Page<SeedDTO> getAllSeeds(Pageable pageable) {
+        return seedRepository.findAll(pageable)
+                .map(this::convertToDTO);
     }
 
     @Override
@@ -174,7 +175,7 @@ public class SeedServiceImpl implements SeedService {
     // 辅助方法：将实体转换为 DTO
     private SeedDTO convertToDTO(Seed seed) {
         SeedDTO dto = new SeedDTO();
-        dto.setSeedId(seed.getSeedId());
+        dto.setId(seed.getId());
         dto.setSeedName(seed.getSeedName());
         dto.setGrowthSeasonCount(seed.getGrowthSeasonCount());
         dto.setSeedLevel(seed.getSeedLevel());

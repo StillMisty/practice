@@ -20,10 +20,10 @@ import java.util.Set;
 @Schema(description = "种子")
 public class Seed {
     @Id
-    @Column(name = "seed_id")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "种子 ID")
-    private Long seedId;
+    private Long id;
 
     @Column(name = "image_path")
     @Schema(description = "种子图片保存路径")
@@ -93,7 +93,7 @@ public class Seed {
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
         Seed that = (Seed) o;
-        return getSeedId() != null && Objects.equals(getSeedId(), that.getSeedId());
+        return getId() != null && Objects.equals(getId(), that.getId());
     }
 
     @Override

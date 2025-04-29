@@ -9,6 +9,8 @@ import cn.jxufe.repository.SeedRepository;
 import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.PlayerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -121,10 +123,9 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PlayerDTO> getAllPlayers() {
-        return playerRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public Page<PlayerDTO> getAllPlayers(Pageable pageable) {
+        return playerRepository.findAll(pageable)
+                .map(this::convertToDTO);
     }
 
     @Override
@@ -212,7 +213,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         
         return player.getOwnedSeeds().stream()
-                .map(Seed::getSeedId)
+                .map(Seed::getId)
                 .collect(Collectors.toSet());
     }
 
@@ -242,7 +243,7 @@ public class PlayerServiceImpl implements PlayerService {
         // 收集玩家拥有的种子ID
         if (player.getOwnedSeeds() != null) {
             dto.setOwnedSeedIds(player.getOwnedSeeds().stream()
-                    .map(Seed::getSeedId)
+                    .map(Seed::getId)
                     .collect(Collectors.toSet()));
         } else {
             dto.setOwnedSeedIds(new HashSet<>());
