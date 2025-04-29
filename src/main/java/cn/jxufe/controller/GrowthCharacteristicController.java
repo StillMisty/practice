@@ -2,16 +2,25 @@ package cn.jxufe.controller;
 
 import cn.jxufe.model.dto.GrowthCharacteristicDTO;
 import cn.jxufe.model.enums.CropStatus;
+import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.GrowthCharacteristicService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -21,6 +30,7 @@ import java.util.List;
 public class GrowthCharacteristicController {
 
     private final GrowthCharacteristicService growthCharacteristicService;
+    private final FileStorageService fileStorageService;
 
     @PostMapping
     @Operation(summary = "创建新的生长特性", description = "添加一个新的种子生长特性")
@@ -113,5 +123,72 @@ public class GrowthCharacteristicController {
             @Parameter(description = "种子ID") @PathVariable Long seedId
     ) {
         return ResponseEntity.ok(growthCharacteristicService.getGrowthCharacteristicsBySeedIdSorted(seedId));
+    }
+
+    @PostMapping("/{id}/image")
+    @Operation(summary = "上传生长特性图片", description = "为特定的生长特性上传图片")
+    public ResponseEntity<GrowthCharacteristicDTO> uploadGrowthCharacteristicImage(
+            @Parameter(description = "生长特性ID") @PathVariable Long id,
+            @Parameter(description = "图片文件") @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            GrowthCharacteristicDTO dto = growthCharacteristicService.getGrowthCharacteristicById(id);
+
+            if (dto.getImagePath() != null && !dto.getImagePath().isEmpty()) {
+                fileStorageService.deleteFile(dto.getImagePath());
+            }
+
+            String imagePath = fileStorageService.storeFile(file, "growth-characteristics");
+
+            dto.setImagePath(imagePath);
+            return ResponseEntity.ok(growthCharacteristicService.updateGrowthCharacteristic(id, dto));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{id}/image")
+    @Operation(summary = "获取生长特性图片", description = "获取特定生长特性的图片")
+    public ResponseEntity<Resource> getGrowthCharacteristicImage(
+            @Parameter(description = "生长特性ID") @PathVariable Long id
+    ) {
+        GrowthCharacteristicDTO dto = growthCharacteristicService.getGrowthCharacteristicById(id);
+
+        if (dto.getImagePath() == null || dto.getImagePath().isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            Path imagePath = fileStorageService.getFilePath(dto.getImagePath());
+            Resource resource = new UrlResource(imagePath.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (MalformedURLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping("/{id}/image")
+    @Operation(summary = "删除生长特性图片", description = "删除特定生长特性的图片")
+    public ResponseEntity<GrowthCharacteristicDTO> deleteGrowthCharacteristicImage(
+            @Parameter(description = "生长特性ID") @PathVariable Long id
+    ) {
+        GrowthCharacteristicDTO dto = growthCharacteristicService.getGrowthCharacteristicById(id);
+
+        if (dto.getImagePath() != null && !dto.getImagePath().isEmpty()) {
+            fileStorageService.deleteFile(dto.getImagePath());
+
+            dto.setImagePath(null);
+            return ResponseEntity.ok(growthCharacteristicService.updateGrowthCharacteristic(id, dto));
+        }
+
+        return ResponseEntity.ok(dto);
     }
 }

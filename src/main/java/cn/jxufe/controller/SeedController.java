@@ -3,16 +3,28 @@ package cn.jxufe.controller;
 import cn.jxufe.model.dto.SeedDTO;
 import cn.jxufe.model.enums.LandType;
 import cn.jxufe.model.enums.SeedType;
+import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.SeedService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -22,6 +34,7 @@ import java.util.List;
 public class SeedController {
 
     private final SeedService seedService;
+    private final FileStorageService fileStorageService;
 
     @PostMapping
     @Operation(summary = "创建新种子", description = "添加一个新的种子信息")
@@ -110,5 +123,85 @@ public class SeedController {
             @Parameter(description = "玩家ID") @PathVariable Long playerId
     ) {
         return ResponseEntity.ok(seedService.getSeedsByPlayerId(playerId));
+    }
+
+    @PostMapping("/{id}/image")
+    @Operation(summary = "上传种子图片", description = "为特定种子上传图片")
+    @ApiResponse(responseCode = "200", description = "图片上传成功",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema(implementation = SeedDTO.class)))
+    @ApiResponse(responseCode = "500", description = "图片上传失败")
+    public ResponseEntity<SeedDTO> uploadSeedImage(
+            @Parameter(description = "种子ID") @PathVariable Long id,
+            @Parameter(description = "图片文件", 
+                    content = @Content(mediaType = "multipart/form-data"),
+                    schema = @Schema(type = "string", format = "binary")) 
+            @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            // 获取当前种子信息
+            SeedDTO seedDTO = seedService.getSeedById(id);
+            
+            // 删除旧图片（如果存在）
+            if (seedDTO.getImagePath() != null && !seedDTO.getImagePath().isEmpty()) {
+                fileStorageService.deleteFile(seedDTO.getImagePath());
+            }
+            
+            // 上传新图片
+            String imagePath = fileStorageService.storeFile(file, "seeds");
+            
+            // 更新种子的图片路径
+            seedDTO.setImagePath(imagePath);
+            return ResponseEntity.ok(seedService.updateSeed(id, seedDTO));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    @GetMapping("/{id}/image")
+    @Operation(summary = "获取种子图片", description = "获取特定种子的图片")
+    public ResponseEntity<Resource> getSeedImage(
+            @Parameter(description = "种子ID") @PathVariable Long id
+    ) {
+        SeedDTO seedDTO = seedService.getSeedById(id);
+        
+        if (seedDTO.getImagePath() == null || seedDTO.getImagePath().isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        try {
+            Path imagePath = fileStorageService.getFilePath(seedDTO.getImagePath());
+            Resource resource = new UrlResource(imagePath.toUri());
+            
+            if (resource.exists() && resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (MalformedURLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    @DeleteMapping("/{id}/image")
+    @Operation(summary = "删除种子图片", description = "删除特定种子的图片")
+    public ResponseEntity<SeedDTO> deleteSeedImage(
+            @Parameter(description = "种子ID") @PathVariable Long id
+    ) {
+        SeedDTO seedDTO = seedService.getSeedById(id);
+        
+        if (seedDTO.getImagePath() != null && !seedDTO.getImagePath().isEmpty()) {
+            // 删除图片文件
+            fileStorageService.deleteFile(seedDTO.getImagePath());
+            
+            // 更新实体
+            seedDTO.setImagePath(null);
+            return ResponseEntity.ok(seedService.updateSeed(id, seedDTO));
+        }
+        
+        return ResponseEntity.ok(seedDTO);
     }
 }

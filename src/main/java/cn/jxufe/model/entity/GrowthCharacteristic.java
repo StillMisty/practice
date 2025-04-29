@@ -28,8 +28,8 @@ public class GrowthCharacteristic {
     private Long id;
 
     @Column(name = "image_url")
-    @Schema(description = "生长阶段图片 URL")
-    private String imageUrl;
+    @Schema(description = "生长阶段图片保存路径")
+    private String imagePath;
 
     @Column(name = "growth_stage")
     @Schema(description = "生长阶段")

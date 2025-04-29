@@ -151,7 +151,6 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
     private GrowthCharacteristicDTO convertToDTO(GrowthCharacteristic characteristic) {
         GrowthCharacteristicDTO dto = new GrowthCharacteristicDTO();
         dto.setId(characteristic.getId());
-        dto.setImageUrl(characteristic.getImageUrl());
         dto.setGrowthStage(characteristic.getGrowthStage());
         dto.setGrowthStageTitle(characteristic.getGrowthStageTitle());
         dto.setStageGrowthTime(characteristic.getStageGrowthTime());
@@ -167,7 +166,6 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
 
     // 辅助方法：从 DTO 更新实体
     private void updateCharacteristicFromDTO(GrowthCharacteristic characteristic, GrowthCharacteristicDTO dto) {
-        characteristic.setImageUrl(dto.getImageUrl());
         characteristic.setGrowthStage(dto.getGrowthStage());
         characteristic.setGrowthStageTitle(dto.getGrowthStageTitle());
         characteristic.setStageGrowthTime(dto.getStageGrowthTime());

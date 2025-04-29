@@ -18,8 +18,8 @@ public class GrowthCharacteristicDTO {
     @Schema(description = "生长特性 ID", example = "1")
     private Long id;
 
-    @Schema(description = "生长阶段图片 URL", example = "/images/growth/carrot_stage1.png")
-    private String imageUrl;
+    @Schema(description = "生长阶段图片路径", example = "growth-characteristics/carrot_stage1.jpg")
+    private String imagePath;
 
     @NotNull(message = "生长阶段不能为空")
     @Min(value = 1, message = "生长阶段必须大于0")

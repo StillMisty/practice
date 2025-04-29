@@ -1,16 +1,25 @@
 package cn.jxufe.controller;
 
 import cn.jxufe.model.dto.PlayerDTO;
+import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.PlayerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +30,7 @@ import java.util.Set;
 public class PlayerController {
 
     private final PlayerService playerService;
+    private final FileStorageService fileStorageService;
 
     @PostMapping
     @Operation(summary = "创建新玩家", description = "添加一个新的玩家信息")
@@ -130,5 +140,70 @@ public class PlayerController {
             @Parameter(description = "用户名") @RequestParam String username
     ) {
         return ResponseEntity.ok(playerService.isUsernameExists(username));
+    }
+
+    @PostMapping("/{id}/avatar")
+    @Operation(summary = "上传玩家头像", description = "为特定玩家上传头像图片")
+    public ResponseEntity<PlayerDTO> uploadPlayerAvatar(
+            @Parameter(description = "玩家ID") @PathVariable Long id,
+            @Parameter(description = "头像图片文件") @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            PlayerDTO playerDTO = playerService.getPlayerById(id);
+
+            if (playerDTO.getAvatar() != null && !playerDTO.getAvatar().isEmpty()) {
+                fileStorageService.deleteFile(playerDTO.getAvatar());
+            }
+
+            String avatarPath = fileStorageService.storeFile(file, "player-avatars");
+            playerDTO.setAvatar(avatarPath);
+            return ResponseEntity.ok(playerService.updatePlayer(id, playerDTO));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{id}/avatar")
+    @Operation(summary = "获取玩家头像", description = "获取特定玩家的头像图片")
+    public ResponseEntity<Resource> getPlayerAvatar(
+            @Parameter(description = "玩家ID") @PathVariable Long id
+    ) {
+        PlayerDTO playerDTO = playerService.getPlayerById(id);
+
+        if (playerDTO.getAvatar() == null || playerDTO.getAvatar().isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            Path avatarPath = fileStorageService.getFilePath(playerDTO.getAvatar());
+            Resource resource = new UrlResource(avatarPath.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (MalformedURLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping("/{id}/avatar")
+    @Operation(summary = "删除玩家头像", description = "删除特定玩家的头像图片")
+    public ResponseEntity<PlayerDTO> deletePlayerAvatar(
+            @Parameter(description = "玩家ID") @PathVariable Long id
+    ) {
+        PlayerDTO playerDTO = playerService.getPlayerById(id);
+
+        if (playerDTO.getAvatar() != null && !playerDTO.getAvatar().isEmpty()) {
+            fileStorageService.deleteFile(playerDTO.getAvatar());
+            playerDTO.setAvatar(null);
+            return ResponseEntity.ok(playerService.updatePlayer(id, playerDTO));
+        }
+
+        return ResponseEntity.ok(playerDTO);
     }
 }
