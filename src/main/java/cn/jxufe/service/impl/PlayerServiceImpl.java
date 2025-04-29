@@ -196,7 +196,6 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerDTO dto = new PlayerDTO();
         dto.setId(player.getId());
         dto.setUsername(player.getUsername());
-        dto.setAvatar(player.getAvatar());
         dto.setDisplayName(player.getDisplayName());
         dto.setExperiencePoints(player.getExperiencePoints());
         dto.setTotalPoints(player.getTotalPoints());
@@ -217,7 +216,6 @@ public class PlayerServiceImpl implements PlayerService {
     // 辅助方法：从 DTO 更新实体
     private void updatePlayerFromDTO(Player player, PlayerDTO dto) {
         player.setUsername(dto.getUsername());
-        player.setAvatar(dto.getAvatar());
         player.setDisplayName(dto.getDisplayName());
         player.setExperiencePoints(dto.getExperiencePoints());
         player.setTotalPoints(dto.getTotalPoints());

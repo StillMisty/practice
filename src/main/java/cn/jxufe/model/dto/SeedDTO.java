@@ -19,9 +19,6 @@ public class SeedDTO {
     @Schema(description = "种子 ID", example = "1")
     private Long seedId;
 
-    @Schema(description = "种子图片 URL", example = "/images/seeds/carrot.png")
-    private String imagePath;
-
     @NotBlank(message = "种子名称不能为空")
     @Schema(description = "种子名称", example = "胡萝卜")
     private String seedName;

@@ -24,9 +24,6 @@ public class PlayerDTO {
     @Schema(description = "用户名", example = "player001")
     private String username;
 
-    @Schema(description = "头像保存路径", example = "/images/avatars/player001.png")
-    private String avatar;
-
     @Size(max = 100, message = "显示名称不能超过100个字符")
     @Schema(description = "显示名称", example = "萌萌的小农民")
     private String displayName;

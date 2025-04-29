@@ -6,11 +6,15 @@ import cn.jxufe.model.entity.Seed;
 import cn.jxufe.model.enums.LandType;
 import cn.jxufe.model.enums.SeedType;
 import cn.jxufe.repository.SeedRepository;
+import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.SeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,23 +23,66 @@ import java.util.stream.Collectors;
 @Transactional
 public class SeedServiceImpl implements SeedService {
 
+    private final FileStorageService fileStorageService;
     private final SeedRepository seedRepository;
 
     @Override
     public SeedDTO createSeed(SeedDTO seedDTO) {
-        Seed seed = convertToEntity(seedDTO);
+        Seed seed = convertToEntity(seedDTO,null);
         Seed savedSeed = seedRepository.save(seed);
         return convertToDTO(savedSeed);
     }
 
     @Override
-    public SeedDTO updateSeed(Long seedId, SeedDTO seedDTO) {
+    public SeedDTO updateSeed(
+            Long seedId, SeedDTO seedDTO
+    ) {
         Seed existingSeed = seedRepository.findById(seedId)
                 .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
 
         updateSeedFromDTO(existingSeed, seedDTO);
         Seed updatedSeed = seedRepository.save(existingSeed);
         return convertToDTO(updatedSeed);
+    }
+
+    @Override
+    public SeedDTO updateSeedImage(
+            Long seedId,
+            MultipartFile file
+    ) throws IOException {
+        Seed existingSeed = seedRepository.findById(seedId)
+                .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
+
+        // 删除旧图片
+        fileStorageService.deleteFile(existingSeed.getImagePath());
+
+        // 上传新图片
+        String imagePath = fileStorageService.storeFile(file, "seeds");
+        existingSeed.setImagePath(imagePath);
+        Seed updatedSeed = seedRepository.save(existingSeed);
+        return convertToDTO(updatedSeed);
+    }
+
+    @Override
+    public Path getSeedImagePath(Long seedId) throws IOException {
+        Seed seed = seedRepository.findById(seedId)
+                .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
+        String imagePath = seed.getImagePath();
+        return fileStorageService.getFilePath(imagePath);
+    }
+
+    @Override
+    public boolean deleteSeedImage( Long seedId) throws IOException {
+        Seed existingSeed = seedRepository.findById(seedId)
+                .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
+
+        String imagePath = existingSeed.getImagePath();
+        boolean deleted = fileStorageService.deleteFile(imagePath);
+        if (deleted) {
+            existingSeed.setImagePath(null);
+            seedRepository.save(existingSeed);
+        }
+        return deleted;
     }
 
     @Override
@@ -119,9 +166,9 @@ public class SeedServiceImpl implements SeedService {
     }
 
     // 辅助方法：将 DTO 转换为实体
-    private Seed convertToEntity(SeedDTO seedDTO) {
+    private Seed convertToEntity(SeedDTO seedDTO, String imagePath) {
         Seed seed = new Seed();
-        updateSeedFromDTO(seed, seedDTO);
+        updateSeedFromDTO(seed, seedDTO, imagePath);
         return seed;
     }
 
@@ -129,7 +176,6 @@ public class SeedServiceImpl implements SeedService {
     private SeedDTO convertToDTO(Seed seed) {
         SeedDTO dto = new SeedDTO();
         dto.setSeedId(seed.getSeedId());
-        dto.setImagePath(seed.getImagePath());
         dto.setSeedName(seed.getSeedName());
         dto.setGrowthSeasonCount(seed.getGrowthSeasonCount());
         dto.setSeedLevel(seed.getSeedLevel());
@@ -146,8 +192,23 @@ public class SeedServiceImpl implements SeedService {
     }
 
     // 辅助方法：从 DTO 更新实体
+    private void updateSeedFromDTO(Seed seed, SeedDTO seedDTO, String ImagePath) {
+        seed.setImagePath(ImagePath);
+        seed.setSeedName(seedDTO.getSeedName());
+        seed.setGrowthSeasonCount(seedDTO.getGrowthSeasonCount());
+        seed.setSeedLevel(seedDTO.getSeedLevel());
+        seed.setSeedType(seedDTO.getSeedType());
+        seed.setExperience(seedDTO.getExperience());
+        seed.setPoints(seedDTO.getPoints());
+        seed.setHarvestYield(seedDTO.getHarvestYield());
+        seed.setGrowthTimePerSeason(seedDTO.getGrowthTimePerSeason());
+        seed.setSeedPurchasePrice(seedDTO.getSeedPurchasePrice());
+        seed.setFruitPricePerUnit(seedDTO.getFruitPricePerUnit());
+        seed.setLandRequirement(seedDTO.getLandRequirement());
+        seed.setPlantingTip(seedDTO.getPlantingTip());
+    }
+
     private void updateSeedFromDTO(Seed seed, SeedDTO seedDTO) {
-        seed.setImagePath(seedDTO.getImagePath());
         seed.setSeedName(seedDTO.getSeedName());
         seed.setGrowthSeasonCount(seedDTO.getGrowthSeasonCount());
         seed.setSeedLevel(seedDTO.getSeedLevel());

@@ -131,20 +131,7 @@ public class GrowthCharacteristicController {
             @Parameter(description = "生长特性ID") @PathVariable Long id,
             @Parameter(description = "图片文件") @RequestParam("file") MultipartFile file
     ) {
-        try {
-            GrowthCharacteristicDTO dto = growthCharacteristicService.getGrowthCharacteristicById(id);
 
-            if (dto.getImagePath() != null && !dto.getImagePath().isEmpty()) {
-                fileStorageService.deleteFile(dto.getImagePath());
-            }
-
-            String imagePath = fileStorageService.storeFile(file, "growth-characteristics");
-
-            dto.setImagePath(imagePath);
-            return ResponseEntity.ok(growthCharacteristicService.updateGrowthCharacteristic(id, dto));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
 
     @GetMapping("/{id}/image")
@@ -152,43 +139,14 @@ public class GrowthCharacteristicController {
     public ResponseEntity<Resource> getGrowthCharacteristicImage(
             @Parameter(description = "生长特性ID") @PathVariable Long id
     ) {
-        GrowthCharacteristicDTO dto = growthCharacteristicService.getGrowthCharacteristicById(id);
 
-        if (dto.getImagePath() == null || dto.getImagePath().isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        try {
-            Path imagePath = fileStorageService.getFilePath(dto.getImagePath());
-            Resource resource = new UrlResource(imagePath.toUri());
-
-            if (resource.exists() && resource.isReadable()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                        .body(resource);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (MalformedURLException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
 
     @DeleteMapping("/{id}/image")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "删除生长特性图片", description = "删除特定生长特性的图片")
-    public ResponseEntity<GrowthCharacteristicDTO> deleteGrowthCharacteristicImage(
+    public void  deleteGrowthCharacteristicImage(
             @Parameter(description = "生长特性ID") @PathVariable Long id
     ) {
-        GrowthCharacteristicDTO dto = growthCharacteristicService.getGrowthCharacteristicById(id);
-
-        if (dto.getImagePath() != null && !dto.getImagePath().isEmpty()) {
-            fileStorageService.deleteFile(dto.getImagePath());
-
-            dto.setImagePath(null);
-            return ResponseEntity.ok(growthCharacteristicService.updateGrowthCharacteristic(id, dto));
-        }
-
-        return ResponseEntity.ok(dto);
     }
 }

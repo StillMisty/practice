@@ -3,17 +3,30 @@ package cn.jxufe.service;
 import cn.jxufe.model.dto.SeedDTO;
 import cn.jxufe.model.enums.LandType;
 import cn.jxufe.model.enums.SeedType;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public interface SeedService {
     
     // 创建新种子
     SeedDTO createSeed(SeedDTO seedDTO);
-    
-    // 更新种子信息
-    SeedDTO updateSeed(Long seedId, SeedDTO seedDTO);
-    
+
+    SeedDTO updateSeed(
+            Long seedId, SeedDTO seedDTO
+    ) ;
+
+    SeedDTO updateSeedImage(
+            Long seedId,
+            MultipartFile file
+    ) throws IOException;
+
+    Path getSeedImagePath(Long seedId) throws IOException;
+
+    boolean deleteSeedImage(Long seedId) throws IOException;
+
     // 删除种子
     void deleteSeed(Long seedId);
     

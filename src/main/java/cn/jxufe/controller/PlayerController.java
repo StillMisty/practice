@@ -148,19 +148,7 @@ public class PlayerController {
             @Parameter(description = "玩家ID") @PathVariable Long id,
             @Parameter(description = "头像图片文件") @RequestParam("file") MultipartFile file
     ) {
-        try {
-            PlayerDTO playerDTO = playerService.getPlayerById(id);
 
-            if (playerDTO.getAvatar() != null && !playerDTO.getAvatar().isEmpty()) {
-                fileStorageService.deleteFile(playerDTO.getAvatar());
-            }
-
-            String avatarPath = fileStorageService.storeFile(file, "player-avatars");
-            playerDTO.setAvatar(avatarPath);
-            return ResponseEntity.ok(playerService.updatePlayer(id, playerDTO));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
 
     @GetMapping("/{id}/avatar")
@@ -168,42 +156,14 @@ public class PlayerController {
     public ResponseEntity<Resource> getPlayerAvatar(
             @Parameter(description = "玩家ID") @PathVariable Long id
     ) {
-        PlayerDTO playerDTO = playerService.getPlayerById(id);
 
-        if (playerDTO.getAvatar() == null || playerDTO.getAvatar().isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        try {
-            Path avatarPath = fileStorageService.getFilePath(playerDTO.getAvatar());
-            Resource resource = new UrlResource(avatarPath.toUri());
-
-            if (resource.exists() && resource.isReadable()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                        .body(resource);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (MalformedURLException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
 
     @DeleteMapping("/{id}/avatar")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "删除玩家头像", description = "删除特定玩家的头像图片")
-    public ResponseEntity<PlayerDTO> deletePlayerAvatar(
+    public void deletePlayerAvatar(
             @Parameter(description = "玩家ID") @PathVariable Long id
     ) {
-        PlayerDTO playerDTO = playerService.getPlayerById(id);
-
-        if (playerDTO.getAvatar() != null && !playerDTO.getAvatar().isEmpty()) {
-            fileStorageService.deleteFile(playerDTO.getAvatar());
-            playerDTO.setAvatar(null);
-            return ResponseEntity.ok(playerService.updatePlayer(id, playerDTO));
-        }
-
-        return ResponseEntity.ok(playerDTO);
     }
 }
