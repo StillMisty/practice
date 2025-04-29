@@ -1,7 +1,6 @@
 package cn.jxufe.controller;
 
 import cn.jxufe.model.dto.PlayerDTO;
-import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.PlayerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

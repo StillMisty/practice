@@ -28,7 +28,7 @@ public class SeedServiceImpl implements SeedService {
 
     @Override
     public SeedDTO createSeed(SeedDTO seedDTO) {
-        Seed seed = convertToEntity(seedDTO,null);
+        Seed seed = convertToEntity(seedDTO);
         Seed savedSeed = seedRepository.save(seed);
         return convertToDTO(savedSeed);
     }
@@ -64,14 +64,14 @@ public class SeedServiceImpl implements SeedService {
     }
 
     @Override
-    public Path getSeedImagePath(Long seedId) throws IOException {
+    public Path getSeedImagePath(Long seedId) {
         Seed seed = seedRepository.findById(seedId)
                 .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
         return seed.getImagePath() == null ? null : fileStorageService.getFilePath(seed.getImagePath());
     }
 
     @Override
-    public boolean deleteSeedImage( Long seedId) throws IOException {
+    public boolean deleteSeedImage( Long seedId) {
         Seed existingSeed = seedRepository.findById(seedId)
                 .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
 
@@ -165,9 +165,9 @@ public class SeedServiceImpl implements SeedService {
     }
 
     // 辅助方法：将 DTO 转换为实体
-    private Seed convertToEntity(SeedDTO seedDTO, String imagePath) {
+    private Seed convertToEntity(SeedDTO seedDTO) {
         Seed seed = new Seed();
-        updateSeedFromDTO(seed, seedDTO, imagePath);
+        updateSeedFromDTO(seed, seedDTO, null);
         return seed;
     }
 
