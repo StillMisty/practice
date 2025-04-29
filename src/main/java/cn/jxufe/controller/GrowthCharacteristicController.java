@@ -125,7 +125,7 @@ public class GrowthCharacteristicController {
         return ResponseEntity.ok(growthCharacteristicService.getGrowthCharacteristicsBySeedIdSorted(seedId));
     }
 
-    @PostMapping("/{id}/image")
+    @PostMapping(path = "/{id}/image",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传生长特性图片", description = "为特定的生长特性上传图片")
     public ResponseEntity<GrowthCharacteristicDTO> uploadGrowthCharacteristicImage(
             @Parameter(description = "生长特性ID") @PathVariable Long id,

@@ -142,7 +142,7 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.isUsernameExists(username));
     }
 
-    @PostMapping("/{id}/avatar")
+    @PostMapping(path = "/{id}/avatar",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传玩家头像", description = "为特定玩家上传头像图片")
     public ResponseEntity<PlayerDTO> uploadPlayerAvatar(
             @Parameter(description = "玩家ID") @PathVariable Long id,
