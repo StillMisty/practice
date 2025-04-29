@@ -167,7 +167,7 @@ public class SeedServiceImpl implements SeedService {
     // 辅助方法：将 DTO 转换为实体
     private Seed convertToEntity(SeedDTO seedDTO) {
         Seed seed = new Seed();
-        updateSeedFromDTO(seed, seedDTO, null);
+        updateSeedFromDTO(seed, seedDTO);
         return seed;
     }
 
@@ -191,22 +191,6 @@ public class SeedServiceImpl implements SeedService {
     }
 
     // 辅助方法：从 DTO 更新实体
-    private void updateSeedFromDTO(Seed seed, SeedDTO seedDTO, String ImagePath) {
-        seed.setImagePath(ImagePath);
-        seed.setSeedName(seedDTO.getSeedName());
-        seed.setGrowthSeasonCount(seedDTO.getGrowthSeasonCount());
-        seed.setSeedLevel(seedDTO.getSeedLevel());
-        seed.setSeedType(seedDTO.getSeedType());
-        seed.setExperience(seedDTO.getExperience());
-        seed.setPoints(seedDTO.getPoints());
-        seed.setHarvestYield(seedDTO.getHarvestYield());
-        seed.setGrowthTimePerSeason(seedDTO.getGrowthTimePerSeason());
-        seed.setSeedPurchasePrice(seedDTO.getSeedPurchasePrice());
-        seed.setFruitPricePerUnit(seedDTO.getFruitPricePerUnit());
-        seed.setLandRequirement(seedDTO.getLandRequirement());
-        seed.setPlantingTip(seedDTO.getPlantingTip());
-    }
-
     private void updateSeedFromDTO(Seed seed, SeedDTO seedDTO) {
         seed.setSeedName(seedDTO.getSeedName());
         seed.setGrowthSeasonCount(seedDTO.getGrowthSeasonCount());
