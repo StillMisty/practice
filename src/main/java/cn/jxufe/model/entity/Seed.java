@@ -25,7 +25,7 @@ public class Seed {
     @Schema(description = "种子 ID")
     private Long seedId;
 
-    @Column(name = "image_url")
+    @Column(name = "image_path")
     @Schema(description = "种子图片保存路径")
     private String imagePath;
 

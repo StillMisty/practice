@@ -1,7 +1,10 @@
 package cn.jxufe.service;
 
 import cn.jxufe.model.dto.PlayerDTO;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
@@ -12,6 +15,15 @@ public interface PlayerService {
     
     // 更新玩家信息
     PlayerDTO updatePlayer(Long id, PlayerDTO playerDTO);
+
+    // 更新玩家头像
+    PlayerDTO updatePlayerAvatar(Long id, MultipartFile file) throws IOException;
+
+    // 获取玩家头像
+    Path getPlayerAvatar(Long id);
+
+    // 删除玩家头像
+    boolean deletePlayerAvatar(Long id);
     
     // 删除玩家
     void deletePlayer(Long id);

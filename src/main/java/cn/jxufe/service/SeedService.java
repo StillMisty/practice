@@ -14,17 +14,21 @@ public interface SeedService {
     // 创建新种子
     SeedDTO createSeed(SeedDTO seedDTO);
 
+    // 更新种子信息
     SeedDTO updateSeed(
             Long seedId, SeedDTO seedDTO
     ) ;
 
+    // 更新种子图片
     SeedDTO updateSeedImage(
             Long seedId,
             MultipartFile file
     ) throws IOException;
 
+    // 获取种子图片
     Path getSeedImagePath(Long seedId) throws IOException;
 
+    // 删除种子图片
     boolean deleteSeedImage(Long seedId) throws IOException;
 
     // 删除种子

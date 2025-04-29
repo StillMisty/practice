@@ -6,11 +6,15 @@ import cn.jxufe.model.entity.Player;
 import cn.jxufe.model.entity.Seed;
 import cn.jxufe.repository.PlayerRepository;
 import cn.jxufe.repository.SeedRepository;
+import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +27,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     private final PlayerRepository playerRepository;
     private final SeedRepository seedRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public PlayerDTO createPlayer(PlayerDTO playerDTO) {
@@ -55,6 +60,39 @@ public class PlayerServiceImpl implements PlayerService {
         
         Player updatedPlayer = playerRepository.save(existingPlayer);
         return convertToDTO(updatedPlayer);
+    }
+
+    @Override
+    public PlayerDTO updatePlayerAvatar(Long id, MultipartFile file) throws IOException {
+        Player existingPlayer = playerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("玩家不存在，ID: " + id));
+
+        // 删除旧头像
+        fileStorageService.deleteFile(existingPlayer.getAvatarPath());
+
+        // 上传新头像
+        String avatarPath = fileStorageService.storeFile(file, "avatars");
+
+        existingPlayer.setAvatarPath(avatarPath);
+
+        Player updatedPlayer = playerRepository.save(existingPlayer);
+        return convertToDTO(updatedPlayer);
+    }
+
+    @Override
+    public Path getPlayerAvatar(Long id) {
+        Player player = playerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("玩家不存在，ID: " + id));
+        return player.getAvatarPath() == null ? null : fileStorageService.getFilePath(player.getAvatarPath());
+    }
+
+    @Override
+    public boolean deletePlayerAvatar(Long id) {
+        Player existingPlayer = playerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("玩家不存在，ID: " + id));
+
+        // 删除旧头像
+        return fileStorageService.deleteFile(existingPlayer.getAvatarPath());
     }
 
     @Override

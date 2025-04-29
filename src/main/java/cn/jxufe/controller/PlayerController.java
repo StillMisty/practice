@@ -30,7 +30,6 @@ import java.util.Set;
 public class PlayerController {
 
     private final PlayerService playerService;
-    private final FileStorageService fileStorageService;
 
     @PostMapping
     @Operation(summary = "创建新玩家", description = "添加一个新的玩家信息")
@@ -147,16 +146,31 @@ public class PlayerController {
     public ResponseEntity<PlayerDTO> uploadPlayerAvatar(
             @Parameter(description = "玩家ID") @PathVariable Long id,
             @Parameter(description = "头像图片文件") @RequestParam("file") MultipartFile file
-    ) {
-
+    ) throws IOException {
+        return ResponseEntity.ok(playerService.updatePlayerAvatar(id, file));
     }
 
     @GetMapping("/{id}/avatar")
     @Operation(summary = "获取玩家头像", description = "获取特定玩家的头像图片")
     public ResponseEntity<Resource> getPlayerAvatar(
             @Parameter(description = "玩家ID") @PathVariable Long id
-    ) {
+    ) throws MalformedURLException {
+        // 获取图片文件路径
+        Path imagePath = playerService.getPlayerAvatar(id);
+        if (imagePath == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Resource resource = new UrlResource(imagePath.toUri());
 
+        // 检查资源是否存在且可读
+        if (resource.exists() && resource.isReadable()) {
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}/avatar")
@@ -165,5 +179,6 @@ public class PlayerController {
     public void deletePlayerAvatar(
             @Parameter(description = "玩家ID") @PathVariable Long id
     ) {
+        playerService.deletePlayerAvatar(id);
     }
 }

@@ -3,7 +3,6 @@ package cn.jxufe.controller;
 import cn.jxufe.model.dto.SeedDTO;
 import cn.jxufe.model.enums.LandType;
 import cn.jxufe.model.enums.SeedType;
-import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.SeedService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -31,7 +29,6 @@ import java.util.List;
 public class SeedController {
 
     private final SeedService seedService;
-    private final FileStorageService fileStorageService;
 
     @PostMapping
     @Operation(summary = "创建新种子", description = "添加一个新的种子信息")
@@ -122,7 +119,7 @@ public class SeedController {
         return ResponseEntity.ok(seedService.getSeedsByPlayerId(playerId));
     }
 
-    @PostMapping(path = "/{id}/image",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传种子图片", description = "为特定种子上传图片")
     public ResponseEntity<SeedDTO> uploadSeedImage(
             @Parameter(description = "种子ID") @PathVariable Long id,
@@ -139,24 +136,23 @@ public class SeedController {
     @Operation(summary = "获取种子图片", description = "获取特定种子的图片")
     public ResponseEntity<Resource> getSeedImage(
             @Parameter(description = "种子ID") @PathVariable Long id
-    ) {
-        try {
-            
-            // 获取图片文件路径
-            Path imagePath = seedService.getSeedImagePath(id);
-            Resource resource = new UrlResource(imagePath.toUri());
-            
-            // 检查资源是否存在且可读
-            if (resource.exists() && resource.isReadable()) {
-                return ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(resource);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    ) throws IOException {
+
+        // 获取图片文件路径
+        Path imagePath = seedService.getSeedImagePath(id);
+        if (imagePath == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Resource resource = new UrlResource(imagePath.toUri());
+
+        // 检查资源是否存在且可读
+        if (resource.exists() && resource.isReadable()) {
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -166,6 +162,6 @@ public class SeedController {
     public void deleteSeedImage(
             @Parameter(description = "种子ID") @PathVariable Long id
     ) throws IOException {
-            seedService.deleteSeedImage(id);
+        seedService.deleteSeedImage(id);
     }
 }

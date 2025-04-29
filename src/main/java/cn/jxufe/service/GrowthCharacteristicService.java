@@ -2,7 +2,10 @@ package cn.jxufe.service;
 
 import cn.jxufe.model.dto.GrowthCharacteristicDTO;
 import cn.jxufe.model.enums.CropStatus;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public interface GrowthCharacteristicService {
@@ -12,6 +15,15 @@ public interface GrowthCharacteristicService {
     
     // 更新生长特性
     GrowthCharacteristicDTO updateGrowthCharacteristic(Long id, GrowthCharacteristicDTO dto);
+
+    // 更新生长特性图片
+    GrowthCharacteristicDTO updateGrowthCharacteristicImage(Long id, MultipartFile file) throws IOException;
+
+    // 获取生长特性图片
+    Path getGrowthCharacteristicImagePath(Long id);
+
+    // 删除生长特性图片
+    boolean deleteGrowthCharacteristicImage(Long id);
     
     // 删除生长特性
     void deleteGrowthCharacteristic(Long id);

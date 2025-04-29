@@ -2,7 +2,6 @@ package cn.jxufe.controller;
 
 import cn.jxufe.model.dto.GrowthCharacteristicDTO;
 import cn.jxufe.model.enums.CropStatus;
-import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.GrowthCharacteristicService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,7 +29,6 @@ import java.util.List;
 public class GrowthCharacteristicController {
 
     private final GrowthCharacteristicService growthCharacteristicService;
-    private final FileStorageService fileStorageService;
 
     @PostMapping
     @Operation(summary = "创建新的生长特性", description = "添加一个新的种子生长特性")
@@ -125,28 +123,44 @@ public class GrowthCharacteristicController {
         return ResponseEntity.ok(growthCharacteristicService.getGrowthCharacteristicsBySeedIdSorted(seedId));
     }
 
-    @PostMapping(path = "/{id}/image",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传生长特性图片", description = "为特定的生长特性上传图片")
     public ResponseEntity<GrowthCharacteristicDTO> uploadGrowthCharacteristicImage(
             @Parameter(description = "生长特性ID") @PathVariable Long id,
             @Parameter(description = "图片文件") @RequestParam("file") MultipartFile file
-    ) {
-
+    ) throws IOException {
+        return ResponseEntity.ok(growthCharacteristicService.updateGrowthCharacteristicImage(id, file));
     }
 
     @GetMapping("/{id}/image")
     @Operation(summary = "获取生长特性图片", description = "获取特定生长特性的图片")
     public ResponseEntity<Resource> getGrowthCharacteristicImage(
             @Parameter(description = "生长特性ID") @PathVariable Long id
-    ) {
+    ) throws MalformedURLException {
+        Path imagePath = growthCharacteristicService.getGrowthCharacteristicImagePath(id);
+        if (imagePath == null) {
+            return ResponseEntity.notFound().build();
+        }
 
+        Resource resource = new UrlResource(imagePath.toUri());
+
+        // 检查资源是否存在且可读
+        if (resource.exists() && resource.isReadable()) {
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}/image")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "删除生长特性图片", description = "删除特定生长特性的图片")
-    public void  deleteGrowthCharacteristicImage(
+    public void deleteGrowthCharacteristicImage(
             @Parameter(description = "生长特性ID") @PathVariable Long id
     ) {
+        growthCharacteristicService.deleteGrowthCharacteristicImage(id);
     }
 }

@@ -27,7 +27,7 @@ public class GrowthCharacteristic {
     @Schema(description = "生长特性 ID")
     private Long id;
 
-    @Column(name = "image_url")
+    @Column(name = "image_path")
     @Schema(description = "生长阶段图片保存路径")
     private String imagePath;
 

@@ -7,11 +7,15 @@ import cn.jxufe.model.entity.Seed;
 import cn.jxufe.model.enums.CropStatus;
 import cn.jxufe.repository.GrowthCharacteristicRepository;
 import cn.jxufe.repository.SeedRepository;
+import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.GrowthCharacteristicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +26,7 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
 
     private final GrowthCharacteristicRepository growthCharacteristicRepository;
     private final SeedRepository seedRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public GrowthCharacteristicDTO createGrowthCharacteristic(GrowthCharacteristicDTO dto) {
@@ -50,6 +55,45 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
         GrowthCharacteristic updatedCharacteristic = growthCharacteristicRepository.save(existingCharacteristic);
         
         return convertToDTO(updatedCharacteristic);
+    }
+
+    @Override
+    public GrowthCharacteristicDTO updateGrowthCharacteristicImage(Long id, MultipartFile file) throws IOException {
+        GrowthCharacteristic characteristic = growthCharacteristicRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("生长特性不存在，ID: " + id));
+
+        // 删除旧图片
+        fileStorageService.deleteFile(characteristic.getImagePath());
+
+        // 上传新图片
+        String imagePath = fileStorageService.storeFile(file, "growth-characteristics");
+
+        characteristic.setImagePath(imagePath);
+        GrowthCharacteristic updatedCharacteristic = growthCharacteristicRepository.save(characteristic);
+
+        return convertToDTO(updatedCharacteristic);
+    }
+
+    @Override
+    public Path getGrowthCharacteristicImagePath(Long id) {
+
+        GrowthCharacteristic characteristic = growthCharacteristicRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("生长特性不存在，ID: " + id));
+        return characteristic.getImagePath() == null ? null : fileStorageService.getFilePath(characteristic.getImagePath());
+    }
+
+    @Override
+    public boolean deleteGrowthCharacteristicImage(Long id) {
+
+        GrowthCharacteristic characteristic = growthCharacteristicRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("生长特性不存在，ID: " + id));
+
+        boolean deleted = fileStorageService.deleteFile(characteristic.getImagePath());
+        if (deleted) {
+            characteristic.setImagePath(null);
+            growthCharacteristicRepository.save(characteristic);
+        }
+        return deleted;
     }
 
     @Override

@@ -67,8 +67,7 @@ public class SeedServiceImpl implements SeedService {
     public Path getSeedImagePath(Long seedId) throws IOException {
         Seed seed = seedRepository.findById(seedId)
                 .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
-        String imagePath = seed.getImagePath();
-        return fileStorageService.getFilePath(imagePath);
+        return seed.getImagePath() == null ? null : fileStorageService.getFilePath(seed.getImagePath());
     }
 
     @Override

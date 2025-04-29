@@ -27,9 +27,9 @@ public class Player {
     @Schema(description = "用户名")
     private String username;
 
-    @Column(name= "avatar")
+    @Column(name= "avatar_path")
     @Schema(description = "头像保存路径")
-    private String avatar;
+    private String avatarPath;
 
     @Column(name = "display_name", length = 100)
     @Schema(description = "显示名称")
