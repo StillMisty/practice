@@ -77,7 +77,7 @@ public class Seed {
     @Schema(description = "种植提示")
     private String plantingTip;
 
-    @OneToMany(mappedBy = "seedAttribute", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "seed", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<GrowthCharacteristic> growthCharacteristics;
 

@@ -56,6 +56,16 @@ public class Player {
     @ToString.Exclude
     private Set<Seed> ownedSeeds;
     
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "player_growth_characteristic",
+            joinColumns = @JoinColumn(name = "player_id"),
+            inverseJoinColumns = @JoinColumn(name = "growth_characteristic_id")
+    )
+    @ToString.Exclude
+    @Schema(description = "拥有的生长特性")
+    private Set<GrowthCharacteristic> growthCharacteristics;
+    
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

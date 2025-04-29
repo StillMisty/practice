@@ -3,7 +3,10 @@ package cn.jxufe.model.entity;
 import cn.jxufe.model.enums.CropStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
@@ -69,8 +72,8 @@ public class GrowthCharacteristic {
     @ToString.Exclude
     @Schema(description = "种子")
     private Seed seed;
-    
-    @ManyToMany(mappedBy = "ownedSeeds", fetch = FetchType.LAZY)
+
+    @ManyToMany(mappedBy = "growthCharacteristics", fetch = FetchType.LAZY)
     @ToString.Exclude
     @Schema(description = "拥有的玩家")
     private Set<Player> players;

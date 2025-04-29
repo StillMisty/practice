@@ -9,7 +9,6 @@ import lombok.Setter;
 @Schema(description = "种子等级")
 @Getter
 @AllArgsConstructor
-@RequiredArgsConstructor
 public enum SeedType {
     COMMON("普通",1),
     UNCOMMON("非凡",2),

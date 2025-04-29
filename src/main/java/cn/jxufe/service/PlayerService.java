@@ -1,0 +1,54 @@
+package cn.jxufe.service;
+
+import cn.jxufe.model.dto.PlayerDTO;
+
+import java.util.List;
+import java.util.Set;
+
+public interface PlayerService {
+
+    // 创建新玩家
+    PlayerDTO createPlayer(PlayerDTO playerDTO);
+    
+    // 更新玩家信息
+    PlayerDTO updatePlayer(Long id, PlayerDTO playerDTO);
+    
+    // 删除玩家
+    void deletePlayer(Long id);
+    
+    // 根据ID获取玩家信息
+    PlayerDTO getPlayerById(Long id);
+    
+    // 根据用户名获取玩家信息
+    PlayerDTO getPlayerByUsername(String username);
+    
+    // 获取所有玩家
+    List<PlayerDTO> getAllPlayers();
+    
+    // 根据显示名称搜索玩家
+    List<PlayerDTO> searchPlayersByDisplayName(String displayName);
+    
+    // 查找经验值排行榜
+    List<PlayerDTO> getPlayersByExperienceRanking();
+    
+    // 查找金币排行榜
+    List<PlayerDTO> getPlayersByGoldCoinsRanking();
+    
+    // 查找积分排行榜
+    List<PlayerDTO> getPlayersByPointsRanking();
+    
+    // 查找拥有特定种子的玩家
+    List<PlayerDTO> getPlayersWithSeed(Long seedId);
+    
+    // 为玩家添加种子
+    PlayerDTO addSeedToPlayer(Long playerId, Long seedId);
+    
+    // 为玩家移除种子
+    PlayerDTO removeSeedFromPlayer(Long playerId, Long seedId);
+    
+    // 获取玩家拥有的所有种子ID
+    Set<Long> getPlayerOwnedSeedIds(Long playerId);
+    
+    // 检查用户名是否已存在
+    boolean isUsernameExists(String username);
+}
