@@ -3,6 +3,7 @@ package cn.jxufe.controller;
 import cn.jxufe.model.dto.PlayerDTO;
 import cn.jxufe.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +22,7 @@ public class AuthController {
     @Operation(summary = "设置玩家信息", description = "将玩家ID设置到会话中")
     public PlayerDTO setPlayer(
             HttpSession session,
-            @RequestBody Long playerId
+            @Parameter(description = "玩家 ID") @RequestBody Long playerId
     ) {
         return authService.setPlayerInfo(session, playerId);
     }
