@@ -59,13 +59,13 @@ public class SeedDTO {
 
     @NotNull(message = "种子购买价格不能为空")
     @Min(value = 0, message = "种子购买价格不能为负")
-    @Schema(description = "种子购买价格", example = "25.0")
-    private Double seedPurchasePrice;
+    @Schema(description = "种子购买价格", example = "25")
+    private Long seedPurchasePrice;
 
     @NotNull(message = "水果单价不能为空")
     @Min(value = 0, message = "水果单价不能为负")
-    @Schema(description = "每单位水果出售价格", example = "10.0")
-    private Double fruitPricePerUnit;
+    @Schema(description = "每单位水果出售价格", example = "10")
+    private Long fruitPricePerUnit;
 
     @NotNull(message = "种植土地需求不能为空")
     @Schema(description = "种植土地需求", example = "YELLOW")

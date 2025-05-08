@@ -63,11 +63,11 @@ public class Seed {
 
     @Column(name = "seed_purchase_price")
     @Schema(description = "种子购买价格")
-    private double seedPurchasePrice;
+    private Long seedPurchasePrice;
 
     @Column(name = "fruit_price_per_unit")
     @Schema(description = "每单位水果出售价格")
-    private double fruitPricePerUnit;
+    private Long fruitPricePerUnit;
 
     @Column(name = "land_requirement")
     @Schema(description = "种植土地需求")

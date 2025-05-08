@@ -54,12 +54,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         
         updatePlayerFromDTO(existingPlayer, playerDTO);
-        
-        // 更新玩家拥有的种子集合
-        if (playerDTO.getOwnedSeedIds() != null) {
-            updatePlayerSeeds(existingPlayer, playerDTO.getOwnedSeedIds());
-        }
-        
+
         Player updatedPlayer = playerRepository.save(existingPlayer);
         return convertToDTO(updatedPlayer);
     }
@@ -162,63 +157,6 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PlayerDTO> getPlayersWithSeed(Long seedId) {
-        return playerRepository.findPlayersWithSeed(seedId).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public PlayerDTO addSeedToPlayer(Long playerId, Long seedId) {
-        Player player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new ResourceNotFoundException("玩家不存在，ID: " + playerId));
-        
-        Seed seed = seedRepository.findById(seedId)
-                .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
-        
-        if (player.getOwnedSeeds() == null) {
-            player.setOwnedSeeds(new HashSet<>());
-        }
-        
-        player.getOwnedSeeds().add(seed);
-        Player updatedPlayer = playerRepository.save(player);
-        
-        return convertToDTO(updatedPlayer);
-    }
-
-    @Override
-    public PlayerDTO removeSeedFromPlayer(Long playerId, Long seedId) {
-        Player player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new ResourceNotFoundException("玩家不存在，ID: " + playerId));
-        
-        Seed seed = seedRepository.findById(seedId)
-                .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
-        
-        if (player.getOwnedSeeds() != null) {
-            player.getOwnedSeeds().remove(seed);
-            playerRepository.save(player);
-        }
-        
-        return convertToDTO(player);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Set<Long> getPlayerOwnedSeedIds(Long playerId) {
-        Player player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new ResourceNotFoundException("玩家不存在，ID: " + playerId));
-        
-        if (player.getOwnedSeeds() == null) {
-            return new HashSet<>();
-        }
-        
-        return player.getOwnedSeeds().stream()
-                .map(Seed::getId)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public boolean isUsernameExists(String username) {
         return playerRepository.existsByUsername(username);
     }
@@ -240,15 +178,6 @@ public class PlayerServiceImpl implements PlayerService {
         dto.setTotalPoints(player.getTotalPoints());
         dto.setGoldCoins(player.getGoldCoins());
         
-        // 收集玩家拥有的种子ID
-        if (player.getOwnedSeeds() != null) {
-            dto.setOwnedSeedIds(player.getOwnedSeeds().stream()
-                    .map(Seed::getId)
-                    .collect(Collectors.toSet()));
-        } else {
-            dto.setOwnedSeedIds(new HashSet<>());
-        }
-        
         return dto;
     }
 
@@ -259,19 +188,5 @@ public class PlayerServiceImpl implements PlayerService {
         player.setExperiencePoints(dto.getExperiencePoints());
         player.setTotalPoints(dto.getTotalPoints());
         player.setGoldCoins(dto.getGoldCoins());
-    }
-    
-    // 辅助方法：更新玩家拥有的种子集合
-    private void updatePlayerSeeds(Player player, Set<Long> seedIds) {
-        // 创建一个新的种子集合
-        Set<Seed> seeds = new HashSet<>();
-        
-        // 为每个种子ID查找对应的种子实体并添加到集合中
-        for (Long seedId : seedIds) {
-            seedRepository.findById(seedId).ifPresent(seeds::add);
-        }
-        
-        // 更新玩家的种子集合
-        player.setOwnedSeeds(seeds);
     }
 }

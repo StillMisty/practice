@@ -39,7 +39,4 @@ public class PlayerDTO {
     @Schema(description = "金币", example = "3000")
     @Min(value = 0, message = "金币不能为负数")
     private Long goldCoins;
-
-    @Schema(description = "拥有的种子ID列表")
-    private Set<Long> ownedSeedIds;
 }

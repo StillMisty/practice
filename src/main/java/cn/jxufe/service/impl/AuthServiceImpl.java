@@ -1,9 +1,6 @@
 package cn.jxufe.service.impl;
 
-import cn.jxufe.exception.ResourceNotFoundException;
 import cn.jxufe.model.dto.PlayerDTO;
-import cn.jxufe.model.entity.Player;
-import cn.jxufe.repository.PlayerRepository;
 import cn.jxufe.service.AuthService;
 import cn.jxufe.service.PlayerService;
 import jakarta.servlet.http.HttpSession;

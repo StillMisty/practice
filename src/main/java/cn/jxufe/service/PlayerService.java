@@ -51,18 +51,6 @@ public interface PlayerService {
     // 查找积分排行榜
     List<PlayerDTO> getPlayersByPointsRanking();
     
-    // 查找拥有特定种子的玩家
-    List<PlayerDTO> getPlayersWithSeed(Long seedId);
-    
-    // 为玩家添加种子
-    PlayerDTO addSeedToPlayer(Long playerId, Long seedId);
-    
-    // 为玩家移除种子
-    PlayerDTO removeSeedFromPlayer(Long playerId, Long seedId);
-    
-    // 获取玩家拥有的所有种子ID
-    Set<Long> getPlayerOwnedSeedIds(Long playerId);
-    
     // 检查用户名是否已存在
     boolean isUsernameExists(String username);
 }

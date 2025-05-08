@@ -7,6 +7,7 @@ import cn.jxufe.service.SeedService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -163,5 +164,16 @@ public class SeedController {
     public void deleteSeedImage(
             @Parameter(description = "种子ID") @PathVariable Long id) throws IOException {
         seedService.deleteSeedImage(id);
+    }
+
+    @PostMapping("/buy/{seedId}")
+    @Operation(summary = "购买种子", description = "玩家购买指定ID的种子，自动从session获取玩家信息")
+    public ResponseEntity<String> buySeed(@PathVariable Long seedId, HttpSession session) {
+        try {
+            boolean result = seedService.buySeed(seedId, session);
+            return result ? ResponseEntity.ok("购买成功") : ResponseEntity.status(500).body("购买失败");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

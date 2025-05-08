@@ -8,7 +8,13 @@ import cn.jxufe.model.enums.SeedType;
 import cn.jxufe.repository.SeedRepository;
 import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.SeedService;
+import cn.jxufe.model.entity.Player;
+import cn.jxufe.repository.PlayerRepository;
+import cn.jxufe.service.AuthService;
+import cn.jxufe.model.dto.PlayerDTO;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +34,8 @@ public class SeedServiceImpl implements SeedService {
 
     private final FileStorageService fileStorageService;
     private final SeedRepository seedRepository;
+    private final PlayerRepository playerRepository;
+    private final AuthService authService;
 
     @Override
     public SeedDTO createSeed(SeedDTO seedDTO) {
@@ -37,8 +46,7 @@ public class SeedServiceImpl implements SeedService {
 
     @Override
     public SeedDTO updateSeed(
-            Long seedId, SeedDTO seedDTO
-    ) {
+            Long seedId, SeedDTO seedDTO) {
         Seed existingSeed = seedRepository.findById(seedId)
                 .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
 
@@ -50,8 +58,7 @@ public class SeedServiceImpl implements SeedService {
     @Override
     public SeedDTO updateSeedImage(
             Long seedId,
-            MultipartFile file
-    ) throws IOException {
+            MultipartFile file) throws IOException {
         Seed existingSeed = seedRepository.findById(seedId)
                 .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
 
@@ -73,7 +80,7 @@ public class SeedServiceImpl implements SeedService {
     }
 
     @Override
-    public boolean deleteSeedImage( Long seedId) {
+    public boolean deleteSeedImage(Long seedId) {
         Seed existingSeed = seedRepository.findById(seedId)
                 .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
 
@@ -163,6 +170,32 @@ public class SeedServiceImpl implements SeedService {
         return seedRepository.findSeedsByPlayerId(playerId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean buySeed(Long seedId, HttpSession session) {
+        // 获取当前玩家
+        PlayerDTO playerDTO = authService.getPlayerInfo(session);
+        if (playerDTO == null)
+            throw new RuntimeException("未登录或会话已失效");
+        Player player = playerRepository.findById(playerDTO.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("玩家不存在，ID: " + playerDTO.getId()));
+        // 获取种子
+        Seed seed = seedRepository.findById(seedId)
+                .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
+        double price = seed.getSeedPurchasePrice();
+        // 检查金币
+        if (player.getGoldCoins() < price)
+            throw new RuntimeException("金币不足");
+        // 扣除金币并添加种子
+        player.setGoldCoins(player.getGoldCoins() - (long) price);
+        if (player.getOwnedSeeds() == null)
+            player.setOwnedSeeds(new HashSet<>());
+        player.getOwnedSeeds().add(seed);
+        playerRepository.save(player);
+        // 更新session
+        authService.setPlayerInfo(session, player.getId());
+        return true;
     }
 
     // 辅助方法：将 DTO 转换为实体

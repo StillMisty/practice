@@ -2,7 +2,6 @@ package cn.jxufe.controller;
 
 import cn.jxufe.model.dto.PlayerDTO;
 import cn.jxufe.service.AuthService;
-import cn.jxufe.service.impl.AuthServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
