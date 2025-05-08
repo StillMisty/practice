@@ -172,32 +172,6 @@ public class SeedServiceImpl implements SeedService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public boolean buySeed(Long seedId, HttpSession session) {
-        // 获取当前玩家
-        PlayerDTO playerDTO = authService.getPlayerInfo(session);
-        if (playerDTO == null)
-            throw new RuntimeException("未登录或会话已失效");
-        Player player = playerRepository.findById(playerDTO.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("玩家不存在，ID: " + playerDTO.getId()));
-        // 获取种子
-        Seed seed = seedRepository.findById(seedId)
-                .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
-        double price = seed.getSeedPurchasePrice();
-        // 检查金币
-        if (player.getGoldCoins() < price)
-            throw new RuntimeException("金币不足");
-        // 扣除金币并添加种子
-        player.setGoldCoins(player.getGoldCoins() - (long) price);
-        if (player.getOwnedSeeds() == null)
-            player.setOwnedSeeds(new HashSet<>());
-        player.getOwnedSeeds().add(seed);
-        playerRepository.save(player);
-        // 更新session
-        authService.setPlayerInfo(session, player.getId());
-        return true;
-    }
-
     // 辅助方法：将 DTO 转换为实体
     private Seed convertToEntity(SeedDTO seedDTO) {
         Seed seed = new Seed();

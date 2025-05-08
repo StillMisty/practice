@@ -1,5 +1,6 @@
 package cn.jxufe.service.impl;
 
+import cn.jxufe.exception.ResourceNotFoundException;
 import cn.jxufe.model.dto.PlayerDTO;
 import cn.jxufe.service.AuthService;
 import cn.jxufe.service.PlayerService;
@@ -23,7 +24,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public PlayerDTO getPlayerInfo(HttpSession session) {
         Object player = session.getAttribute("player");
-        return player instanceof PlayerDTO ? (PlayerDTO) player : null;
+        if (player == null) {
+            throw new ResourceNotFoundException("玩家未登录");
+        }
+        return (PlayerDTO) player;
     }
 }
 

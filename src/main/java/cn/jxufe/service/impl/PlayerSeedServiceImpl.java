@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class PlayerSeedServiceImpl implements PlayerSeedService {
@@ -24,11 +27,9 @@ public class PlayerSeedServiceImpl implements PlayerSeedService {
     @Override
     @Transactional
     public PlayerSeedDTO buySeed(Long playerId, Long seedId, Integer quantity) {
-        Player player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new ResourceNotFoundException("找不到玩家"));
+        Player player = playerRepository.findById(playerId).orElseThrow(() -> new ResourceNotFoundException("找不到玩家"));
 
-        Seed seed = seedRepository.findById(seedId)
-                .orElseThrow(() -> new ResourceNotFoundException("找不到种子"));
+        Seed seed = seedRepository.findById(seedId).orElseThrow(() -> new ResourceNotFoundException("找不到种子"));
 
         // 计算总价
         Long totalCost = seed.getSeedPurchasePrice() * quantity;
@@ -43,8 +44,7 @@ public class PlayerSeedServiceImpl implements PlayerSeedService {
         playerRepository.save(player);
 
         // 添加或更新玩家的种子数量
-        PlayerSeed playerSeed = playerSeedRepository.findByPlayerIdAndSeedId(playerId, seedId)
-                .orElse(new PlayerSeed());
+        PlayerSeed playerSeed = playerSeedRepository.findByPlayerIdAndSeedId(playerId, seedId).orElse(new PlayerSeed());
 
         if (playerSeed.getId() == null) {
             playerSeed.setPlayer(player);
@@ -57,11 +57,20 @@ public class PlayerSeedServiceImpl implements PlayerSeedService {
         playerSeed = playerSeedRepository.save(playerSeed);
 
         // 返回DTO
-        return PlayerSeedDTO.builder()
-                .id(playerSeed.getId())
-                .playerId(playerId)
-                .seedId(seedId)
-                .quantity(playerSeed.getQuantity())
-                .build();
+        return PlayerSeedDTO.builder().id(playerSeed.getId()).playerId(playerId).seedId(seedId).quantity(playerSeed.getQuantity()).build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlayerSeedDTO> getPlayerSeeds(Long playerId) {
+        return playerSeedRepository.findByPlayerId(playerId)
+                .stream()
+                .map(playerSeed ->
+                             PlayerSeedDTO.builder()
+                                     .id(playerSeed.getId())
+                                     .playerId(playerSeed.getPlayer().getId())
+                                     .seedId(playerSeed.getSeed().getId())
+                                     .quantity(playerSeed.getQuantity()).build())
+                .collect(Collectors.toList());
     }
 }

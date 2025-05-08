@@ -20,6 +20,13 @@ public class PlayerSeedController {
     private final PlayerSeedService playerSeedService;
     private final AuthService authService;
 
+    @GetMapping("/list")
+    @Operation(summary = "获取玩家种子列表", description = "获取当前登录玩家拥有的所有种子")
+    public ResponseEntity<?> getPlayerSeeds(HttpSession session) {
+        PlayerDTO currentPlayer = authService.getPlayerInfo(session);
+        return ResponseEntity.ok(playerSeedService.getPlayerSeeds(currentPlayer.getId()));
+    }
+
     @PostMapping("/buy/{seedId}")
     @Operation(summary = "购买种子", description = "玩家购买指定的种子")
     public ResponseEntity<?> buySeed(
@@ -27,10 +34,6 @@ public class PlayerSeedController {
             @Parameter(description = "种子ID") @PathVariable Long seedId,
             @Parameter(description = "购买数量") @RequestParam(defaultValue = "1") Integer quantity) {
         PlayerDTO currentPlayer = authService.getPlayerInfo(session);
-        if (currentPlayer == null) {
-            return ResponseEntity.badRequest().body("玩家未登录");
-        }
-
         return ResponseEntity.ok(playerSeedService.buySeed(currentPlayer.getId(), seedId, quantity));
     }
 }

@@ -61,7 +61,4 @@ public interface SeedService {
 
         // 获取玩家拥有的所有种子
         List<SeedDTO> getSeedsByPlayerId(Long playerId);
-
-        // 购买种子（基于session获取玩家）
-        boolean buySeed(Long seedId, HttpSession session);
 }
