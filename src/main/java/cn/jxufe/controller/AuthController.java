@@ -28,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/get-player")
-    @Operation(summary = "获取玩家信息", description = "从会话中获取玩家信息")
+    @Operation(summary = "获取登陆玩家信息", description = "从会话中获取玩家信息")
     public PlayerDTO getPlayer(HttpSession session) {
         return authService.getPlayerInfo(session);
     }

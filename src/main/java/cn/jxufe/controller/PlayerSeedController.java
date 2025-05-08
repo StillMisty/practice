@@ -21,14 +21,14 @@ public class PlayerSeedController {
     private final AuthService authService;
 
     @GetMapping("/list")
-    @Operation(summary = "获取玩家种子列表", description = "获取当前登录玩家拥有的所有种子")
+    @Operation(summary = "获取登陆玩家种子列表", description = "获取当前登录玩家拥有的所有种子")
     public ResponseEntity<?> getPlayerSeeds(HttpSession session) {
         PlayerDTO currentPlayer = authService.getPlayerInfo(session);
         return ResponseEntity.ok(playerSeedService.getPlayerSeeds(currentPlayer.getId()));
     }
 
     @PostMapping("/buy/{seedId}")
-    @Operation(summary = "购买种子", description = "玩家购买指定的种子")
+    @Operation(summary = "登陆玩家购买种子", description = "当前登录玩家购买指定的种子")
     public ResponseEntity<?> buySeed(
             HttpSession session,
             @Parameter(description = "种子ID") @PathVariable Long seedId,
