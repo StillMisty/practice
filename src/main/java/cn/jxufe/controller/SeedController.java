@@ -44,8 +44,7 @@ public class SeedController {
     @Operation(summary = "更新种子信息", description = "根据ID更新已有的种子信息")
     public ResponseEntity<SeedDTO> updateSeed(
             @Parameter(description = "种子ID") @PathVariable Long id,
-            @Valid @RequestBody SeedDTO seedDTO
-    ) {
+            @Valid @RequestBody SeedDTO seedDTO) {
         return ResponseEntity.ok(seedService.updateSeed(id, seedDTO));
     }
 
@@ -68,8 +67,7 @@ public class SeedController {
             @Parameter(description = "页码，从0开始") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "排序所依据的数据库中字段名") @RequestParam(defaultValue = "id") String sortBy,
-            @Parameter(description = "排序方向") Sort.Direction sortDirection
-    ) {
+            @Parameter(description = "排序方向") Sort.Direction sortDirection) {
         Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         return ResponseEntity.ok(seedService.getAllSeeds(pageable));
@@ -78,32 +76,28 @@ public class SeedController {
     @GetMapping("/search")
     @Operation(summary = "按名称搜索种子", description = "根据种子名称进行模糊搜索")
     public ResponseEntity<List<SeedDTO>> searchSeedsByName(
-            @Parameter(description = "种子名称关键字") @RequestParam String name
-    ) {
+            @Parameter(description = "种子名称关键字") @RequestParam String name) {
         return ResponseEntity.ok(seedService.searchSeedsByName(name));
     }
 
     @GetMapping("/type/{seedType}")
     @Operation(summary = "按种子类型查找", description = "获取指定类型的所有种子")
     public ResponseEntity<List<SeedDTO>> findSeedsByType(
-            @Parameter(description = "种子类型") @PathVariable SeedType seedType
-    ) {
+            @Parameter(description = "种子类型") @PathVariable SeedType seedType) {
         return ResponseEntity.ok(seedService.findSeedsByType(seedType));
     }
 
     @GetMapping("/level/{level}")
     @Operation(summary = "按种子等级查找", description = "获取指定等级的所有种子")
     public ResponseEntity<List<SeedDTO>> findSeedsByLevel(
-            @Parameter(description = "种子等级") @PathVariable int level
-    ) {
+            @Parameter(description = "种子等级") @PathVariable int level) {
         return ResponseEntity.ok(seedService.findSeedsByLevel(level));
     }
 
     @GetMapping("/land/{landType}")
     @Operation(summary = "按土地需求查找", description = "获取需要特定土地类型的所有种子")
     public ResponseEntity<List<SeedDTO>> findSeedsByLandRequirement(
-            @Parameter(description = "土地类型") @PathVariable LandType landType
-    ) {
+            @Parameter(description = "土地类型") @PathVariable LandType landType) {
         return ResponseEntity.ok(seedService.findSeedsByLandRequirement(landType));
     }
 
@@ -111,8 +105,7 @@ public class SeedController {
     @Operation(summary = "按价格区间查找", description = "获取指定价格区间内的所有种子")
     public ResponseEntity<List<SeedDTO>> findSeedsByPriceRange(
             @Parameter(description = "最低价格") @RequestParam double min,
-            @Parameter(description = "最高价格") @RequestParam double max
-    ) {
+            @Parameter(description = "最高价格") @RequestParam double max) {
         return ResponseEntity.ok(seedService.findSeedsByPriceRange(min, max));
     }
 
@@ -125,8 +118,7 @@ public class SeedController {
     @GetMapping("/player/{playerId}")
     @Operation(summary = "获取玩家拥有的种子", description = "获取特定玩家拥有的所有种子")
     public ResponseEntity<List<SeedDTO>> getSeedsByPlayerId(
-            @Parameter(description = "玩家ID") @PathVariable Long playerId
-    ) {
+            @Parameter(description = "玩家ID") @PathVariable Long playerId) {
         return ResponseEntity.ok(seedService.getSeedsByPlayerId(playerId));
     }
 
@@ -134,8 +126,7 @@ public class SeedController {
     @Operation(summary = "上传种子图片", description = "为特定种子上传图片")
     public ResponseEntity<SeedDTO> uploadSeedImage(
             @Parameter(description = "种子ID") @PathVariable Long id,
-            @RequestParam("file") MultipartFile file
-    ) {
+            @RequestParam("file") MultipartFile file) {
         try {
             return ResponseEntity.ok(seedService.updateSeedImage(id, file));
         } catch (IOException e) {
@@ -146,8 +137,7 @@ public class SeedController {
     @GetMapping("/{id}/image")
     @Operation(summary = "获取种子图片", description = "获取特定种子的图片")
     public ResponseEntity<Resource> getSeedImage(
-            @Parameter(description = "种子ID") @PathVariable Long id
-    ) throws IOException {
+            @Parameter(description = "种子ID") @PathVariable Long id) throws IOException {
 
         // 获取图片文件路径
         Path imagePath = seedService.getSeedImagePath(id);
@@ -171,8 +161,7 @@ public class SeedController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "删除种子图片", description = "删除特定种子的图片")
     public void deleteSeedImage(
-            @Parameter(description = "种子ID") @PathVariable Long id
-    ) throws IOException {
+            @Parameter(description = "种子ID") @PathVariable Long id) throws IOException {
         seedService.deleteSeedImage(id);
     }
 }
