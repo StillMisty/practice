@@ -1,6 +1,8 @@
 package cn.jxufe.service;
 
+import cn.jxufe.model.dto.LandTypeResponse;
 import cn.jxufe.model.dto.SeedDTO;
+import cn.jxufe.model.dto.SeedTypeResponse;
 import cn.jxufe.model.enums.LandType;
 import cn.jxufe.model.enums.SeedType;
 import jakarta.servlet.http.HttpSession;
@@ -61,4 +63,6 @@ public interface SeedService {
 
         // 获取玩家拥有的所有种子
         List<SeedDTO> getSeedsByPlayerId(Long playerId);
+
+        List<SeedTypeResponse> getAllSeedTypes();
 }

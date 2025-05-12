@@ -43,7 +43,8 @@ public class PlayerController {
     @Operation(summary = "更新玩家信息", description = "根据ID更新已有的玩家信息")
     public ResponseEntity<PlayerDTO> updatePlayer(
             @Parameter(description = "玩家ID") @PathVariable Long id,
-            @Valid @RequestBody PlayerDTO playerDTO) {
+            @Valid @RequestBody PlayerDTO playerDTO
+    ) {
         return ResponseEntity.ok(playerService.updatePlayer(id, playerDTO));
     }
 
@@ -63,7 +64,8 @@ public class PlayerController {
     @GetMapping("/username/{username}")
     @Operation(summary = "根据用户名获取玩家信息", description = "根据用户名获取玩家详细信息")
     public ResponseEntity<PlayerDTO> getPlayerByUsername(
-            @Parameter(description = "用户名") @PathVariable String username) {
+            @Parameter(description = "用户名") @PathVariable String username
+    ) {
         return ResponseEntity.ok(playerService.getPlayerByUsername(username));
     }
 
@@ -73,7 +75,8 @@ public class PlayerController {
             @Parameter(description = "页码，从0开始") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "排序所依据的数据库中字段名") @RequestParam(defaultValue = "id") String sortBy,
-            @Parameter(description = "排序方向") Sort.Direction sortDirection) {
+            @Parameter(description = "排序方向") Sort.Direction sortDirection
+    ) {
         Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         return ResponseEntity.ok(playerService.getAllPlayers(pageable));
@@ -82,7 +85,8 @@ public class PlayerController {
     @GetMapping("/search")
     @Operation(summary = "按显示名称搜索玩家", description = "根据显示名称进行模糊搜索")
     public ResponseEntity<List<PlayerDTO>> searchPlayersByDisplayName(
-            @Parameter(description = "显示名称关键字") @RequestParam String displayName) {
+            @Parameter(description = "显示名称关键字") @RequestParam String displayName
+    ) {
         return ResponseEntity.ok(playerService.searchPlayersByDisplayName(displayName));
     }
 
@@ -107,7 +111,8 @@ public class PlayerController {
     @GetMapping("/check-username")
     @Operation(summary = "检查用户名是否已存在", description = "检查指定用户名是否已被其他玩家使用")
     public ResponseEntity<Boolean> isUsernameExists(
-            @Parameter(description = "用户名") @RequestParam String username) {
+            @Parameter(description = "用户名") @RequestParam String username
+    ) {
         return ResponseEntity.ok(playerService.isUsernameExists(username));
     }
 
@@ -115,14 +120,16 @@ public class PlayerController {
     @Operation(summary = "上传玩家头像", description = "为特定玩家上传头像图片")
     public ResponseEntity<PlayerDTO> uploadPlayerAvatar(
             @Parameter(description = "玩家ID") @PathVariable Long id,
-            @Parameter(description = "头像图片文件") @RequestParam("file") MultipartFile file) throws IOException {
+            @Parameter(description = "头像图片文件") @RequestParam("file") MultipartFile file
+    ) throws IOException {
         return ResponseEntity.ok(playerService.updatePlayerAvatar(id, file));
     }
 
     @GetMapping("/{id}/avatar")
     @Operation(summary = "获取玩家头像", description = "获取特定玩家的头像图片")
     public ResponseEntity<Resource> getPlayerAvatar(
-            @Parameter(description = "玩家ID") @PathVariable Long id) throws MalformedURLException {
+            @Parameter(description = "玩家ID") @PathVariable Long id
+    ) throws MalformedURLException {
         // 获取图片文件路径
         Path imagePath = playerService.getPlayerAvatar(id);
         if (imagePath == null) {
@@ -145,7 +152,8 @@ public class PlayerController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "删除玩家头像", description = "删除特定玩家的头像图片")
     public void deletePlayerAvatar(
-            @Parameter(description = "玩家ID") @PathVariable Long id) {
+            @Parameter(description = "玩家ID") @PathVariable Long id
+    ) {
         playerService.deletePlayerAvatar(id);
     }
 }

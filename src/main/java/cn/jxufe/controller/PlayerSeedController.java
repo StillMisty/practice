@@ -32,7 +32,8 @@ public class PlayerSeedController {
     public ResponseEntity<?> buySeed(
             HttpSession session,
             @Parameter(description = "种子ID") @PathVariable Long seedId,
-            @Parameter(description = "购买数量") @RequestParam(defaultValue = "1") Integer quantity) {
+            @Parameter(description = "购买数量") @RequestParam(defaultValue = "1") Integer quantity
+    ) {
         PlayerDTO currentPlayer = authService.getPlayerInfo(session);
         return ResponseEntity.ok(playerSeedService.buySeed(currentPlayer.getId(), seedId, quantity));
     }

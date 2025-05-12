@@ -68,7 +68,7 @@ public class GrowthCharacteristicController {
     @Operation(summary = "分页获取所有生长特性", description = "获取系统中所有生长特性的列表")
     public ResponseEntity<Page<GrowthCharacteristicDTO>> getAllGrowthCharacteristics(
             @Parameter(description = "页码，从0开始") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10")   int size,
+            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "排序所依据的数据库中字段名") @RequestParam(defaultValue = "id") String sortBy,
             @Parameter(description = "排序方向") Sort.Direction sortDirection
     ) {

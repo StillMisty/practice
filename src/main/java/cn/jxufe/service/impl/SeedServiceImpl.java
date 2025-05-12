@@ -1,20 +1,18 @@
 package cn.jxufe.service.impl;
 
 import cn.jxufe.exception.ResourceNotFoundException;
+import cn.jxufe.model.dto.LandTypeResponse;
 import cn.jxufe.model.dto.SeedDTO;
+import cn.jxufe.model.dto.SeedTypeResponse;
 import cn.jxufe.model.entity.Seed;
 import cn.jxufe.model.enums.LandType;
 import cn.jxufe.model.enums.SeedType;
 import cn.jxufe.repository.SeedRepository;
 import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.SeedService;
-import cn.jxufe.model.entity.Player;
 import cn.jxufe.repository.PlayerRepository;
 import cn.jxufe.service.AuthService;
-import cn.jxufe.model.dto.PlayerDTO;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -169,6 +166,14 @@ public class SeedServiceImpl implements SeedService {
     public List<SeedDTO> getSeedsByPlayerId(Long playerId) {
         return seedRepository.findSeedsByPlayerId(playerId).stream()
                 .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SeedTypeResponse> getAllSeedTypes() {
+        return List.of(SeedType.values()).stream()
+                .map(type -> new SeedTypeResponse(type.name(), type.getChineseName(),type.getGrade()))
                 .collect(Collectors.toList());
     }
 
