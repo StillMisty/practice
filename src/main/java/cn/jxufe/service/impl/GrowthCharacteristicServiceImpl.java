@@ -1,6 +1,7 @@
 package cn.jxufe.service.impl;
 
 import cn.jxufe.exception.ResourceNotFoundException;
+import cn.jxufe.model.dto.CropStatusesResponse;
 import cn.jxufe.model.dto.GrowthCharacteristicDTO;
 import cn.jxufe.model.entity.GrowthCharacteristic;
 import cn.jxufe.model.entity.Seed;
@@ -34,10 +35,10 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
     public GrowthCharacteristicDTO createGrowthCharacteristic(GrowthCharacteristicDTO dto) {
         Seed seed = seedRepository.findById(dto.getSeedId())
                 .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + dto.getSeedId()));
-        
+
         GrowthCharacteristic growthCharacteristic = convertToEntity(dto, seed);
         GrowthCharacteristic savedCharacteristic = growthCharacteristicRepository.save(growthCharacteristic);
-        
+
         return convertToDTO(savedCharacteristic);
     }
 
@@ -45,17 +46,17 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
     public GrowthCharacteristicDTO updateGrowthCharacteristic(Long id, GrowthCharacteristicDTO dto) {
         GrowthCharacteristic existingCharacteristic = growthCharacteristicRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("生长特性不存在，ID: " + id));
-        
+
         // 如果更新时改变了种子
         if (!existingCharacteristic.getSeed().getId().equals(dto.getSeedId())) {
             Seed newSeed = seedRepository.findById(dto.getSeedId())
                     .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + dto.getSeedId()));
             existingCharacteristic.setSeed(newSeed);
         }
-        
+
         updateCharacteristicFromDTO(existingCharacteristic, dto);
         GrowthCharacteristic updatedCharacteristic = growthCharacteristicRepository.save(existingCharacteristic);
-        
+
         return convertToDTO(updatedCharacteristic);
     }
 
@@ -81,7 +82,8 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
 
         GrowthCharacteristic characteristic = growthCharacteristicRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("生长特性不存在，ID: " + id));
-        return characteristic.getImagePath() == null ? null : fileStorageService.getFilePath(characteristic.getImagePath());
+        return characteristic.getImagePath() == null ? null
+                : fileStorageService.getFilePath(characteristic.getImagePath());
     }
 
     @Override
@@ -111,7 +113,7 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
     public GrowthCharacteristicDTO getGrowthCharacteristicById(Long id) {
         GrowthCharacteristic characteristic = growthCharacteristicRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("生长特性不存在，ID: " + id));
-        
+
         return convertToDTO(characteristic);
     }
 
@@ -151,12 +153,12 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
     public GrowthCharacteristicDTO getGrowthCharacteristicBySeedIdAndStage(Long seedId, int growthStage) {
         GrowthCharacteristic characteristic = growthCharacteristicRepository
                 .findBySeedIdAndGrowthStage(seedId, growthStage);
-        
+
         if (characteristic == null) {
             throw new ResourceNotFoundException(
                     "未找到种子ID为 " + seedId + " 且生长阶段为 " + growthStage + " 的生长特性");
         }
-        
+
         return convertToDTO(characteristic);
     }
 
@@ -220,5 +222,12 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
         characteristic.setImageOffsetX(dto.getImageOffsetX());
         characteristic.setImageOffsetY(dto.getImageOffsetY());
         characteristic.setCropStatus(dto.getCropStatus());
+    }
+
+    @Override
+    public List<CropStatusesResponse> getAllCropStatuses() {
+        return List.of(CropStatus.values()).stream()
+                .map(status -> new CropStatusesResponse(status.name(), status.getChineseName()))
+                .collect(Collectors.toList());
     }
 }

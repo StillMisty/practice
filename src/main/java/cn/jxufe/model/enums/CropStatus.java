@@ -10,8 +10,7 @@ import lombok.Getter;
 public enum CropStatus {
     GROWING("生长中"),
     READY_TO_HARVEST("成熟"),
-    HARVESTED("已收获"),
-    PEST_INFESTED("虫害发生");
+    HARVESTED("已收获");
 
-    private final String status;
+    private final String chineseName;
 }
