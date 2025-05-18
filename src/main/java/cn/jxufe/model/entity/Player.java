@@ -2,9 +2,13 @@ package cn.jxufe.model.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -27,7 +31,7 @@ public class Player {
     @Schema(description = "用户名")
     private String username;
 
-    @Column(name= "avatar_path")
+    @Column(name = "avatar_path")
     @Schema(description = "头像保存路径")
     private String avatarPath;
 
@@ -46,17 +50,11 @@ public class Player {
     @Column(name = "gold_coins")
     @Schema(description = "金币")
     private long goldCoins;
-    
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "player_growth_characteristic",
-            joinColumns = @JoinColumn(name = "player_id"),
-            inverseJoinColumns = @JoinColumn(name = "growth_characteristic_id")
-    )
+
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
-    @Schema(description = "拥有的生长特性")
-    private Set<GrowthCharacteristic> growthCharacteristics;
-    
+    private Set<PlayerLand> lands = new HashSet<>();
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

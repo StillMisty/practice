@@ -3,11 +3,10 @@ package cn.jxufe.repository;
 import cn.jxufe.model.entity.GrowthCharacteristic;
 import cn.jxufe.model.enums.CropStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface GrowthCharacteristicRepository extends JpaRepository<GrowthCharacteristic, Long> {
@@ -31,6 +30,8 @@ public interface GrowthCharacteristicRepository extends JpaRepository<GrowthChar
     List<GrowthCharacteristic> findByGrowthStageTitleContaining(String title);
 
     // 查询特定种子的所有生长阶段，按阶段排序
-    @Query("SELECT gc FROM GrowthCharacteristic gc WHERE gc.seed.id = :seedId ORDER BY gc.growthStage ASC")
-    List<GrowthCharacteristic> findBySeedIdOrderByGrowthStageAsc(@Param("seedId") Long seedId);
+    List<GrowthCharacteristic> findBySeedIdOrderByGrowthStageAsc(Long seedId);
+
+    // 查询特定种子的特定作物状态
+    Optional<GrowthCharacteristic> findBySeed_IdAndCropStatus(Long id, CropStatus cropStatus);
 }
