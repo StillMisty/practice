@@ -49,16 +49,6 @@ public class Player {
     
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "player_seed_inventory",
-            joinColumns = @JoinColumn(name = "player_id"),
-            inverseJoinColumns = @JoinColumn(name = "seed_attribute_id")
-    )
-    @ToString.Exclude
-    @Schema(description = "拥有过的的种子")
-    private Set<Seed> ownedSeeds;
-    
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
             name = "player_growth_characteristic",
             joinColumns = @JoinColumn(name = "player_id"),
             inverseJoinColumns = @JoinColumn(name = "growth_characteristic_id")

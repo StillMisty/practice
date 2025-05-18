@@ -61,8 +61,6 @@ public interface SeedService {
         // 按价格排序获取所有种子
         List<SeedDTO> getAllSeedsOrderByPrice();
 
-        // 获取玩家拥有的所有种子
-        List<SeedDTO> getSeedsByPlayerId(Long playerId);
-
+        // 获取所有土地类型
         List<SeedTypeResponse> getAllSeedTypes();
 }

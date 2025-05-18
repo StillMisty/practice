@@ -10,7 +10,8 @@ import lombok.Getter;
 public enum LandType {
     RED("红土地"),
     YELLOW("黄土地"),
-    BLACK("黑土地");
+    BLACK("黑土地"),
+    GOLD("金土地");
 
     private final String chineseName;
 }

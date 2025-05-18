@@ -124,14 +124,6 @@ public class SeedController {
         return ResponseEntity.ok(seedService.getAllSeedsOrderByPrice());
     }
 
-    @GetMapping("/player/{playerId}")
-    @Operation(summary = "获取玩家拥有的种子", description = "获取特定玩家拥有的所有种子")
-    public ResponseEntity<List<SeedDTO>> getSeedsByPlayerId(
-            @Parameter(description = "玩家ID") @PathVariable Long playerId
-    ) {
-        return ResponseEntity.ok(seedService.getSeedsByPlayerId(playerId));
-    }
-
     @PostMapping(path = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传种子图片", description = "为特定种子上传图片")
     public ResponseEntity<SeedDTO> uploadSeedImage(

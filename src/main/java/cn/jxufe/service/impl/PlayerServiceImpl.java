@@ -38,6 +38,10 @@ public class PlayerServiceImpl implements PlayerService {
         }
         
         Player player = convertToEntity(playerDTO);
+
+        // 生成地块
+
+
         Player savedPlayer = playerRepository.save(player);
         return convertToDTO(savedPlayer);
     }
@@ -134,7 +138,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional(readOnly = true)
     public List<PlayerDTO> getPlayersByExperienceRanking() {
-        return playerRepository.findAllOrderByExperiencePointsDesc().stream()
+        return playerRepository.findAllByOrderByExperiencePointsDesc().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -142,7 +146,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional(readOnly = true)
     public List<PlayerDTO> getPlayersByGoldCoinsRanking() {
-        return playerRepository.findAllOrderByGoldCoinsDesc().stream()
+        return playerRepository.findAllByOrderByGoldCoinsDesc().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -150,7 +154,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional(readOnly = true)
     public List<PlayerDTO> getPlayersByPointsRanking() {
-        return playerRepository.findAllOrderByTotalPointsDesc().stream()
+        return playerRepository.findAllByOrderByTotalPointsDesc().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }

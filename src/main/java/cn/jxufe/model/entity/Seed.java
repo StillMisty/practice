@@ -81,10 +81,6 @@ public class Seed {
     @ToString.Exclude
     private List<GrowthCharacteristic> growthCharacteristics;
 
-    @ManyToMany(mappedBy = "ownedSeeds", fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Player> players;
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

@@ -63,7 +63,7 @@ public class GrowthCharacteristic {
     @Schema(description = "图片偏移量 Y")
     private int imageOffsetY;
 
-    @Column(name = "crop_status", length = 50)
+    @Column(name = "crop_status")
     @Schema(description = "作物状态")
     private CropStatus cropStatus;
 

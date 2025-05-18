@@ -1,7 +1,6 @@
 package cn.jxufe.service.impl;
 
 import cn.jxufe.exception.ResourceNotFoundException;
-import cn.jxufe.model.dto.LandTypeResponse;
 import cn.jxufe.model.dto.SeedDTO;
 import cn.jxufe.model.dto.SeedTypeResponse;
 import cn.jxufe.model.entity.Seed;
@@ -156,15 +155,7 @@ public class SeedServiceImpl implements SeedService {
     @Override
     @Transactional(readOnly = true)
     public List<SeedDTO> getAllSeedsOrderByPrice() {
-        return seedRepository.findAllOrderBySeedPurchasePriceAsc().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<SeedDTO> getSeedsByPlayerId(Long playerId) {
-        return seedRepository.findSeedsByPlayerId(playerId).stream()
+        return seedRepository.findByOrderBySeedPurchasePriceAsc().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
