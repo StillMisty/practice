@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@ServerEndpoint("/ws/native/{playerId}")
+@ServerEndpoint("/ws/player/{playerId}")
 @Component
 public class NativeWebSocketServer {
     private static final Map<Long, Session> sessions = new ConcurrentHashMap<>();

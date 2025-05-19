@@ -1,5 +1,6 @@
 package cn.jxufe.model.entity;
 
+import cn.jxufe.model.dto.PlayerLandDTO;
 import cn.jxufe.model.enums.LandType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -55,4 +56,17 @@ public class PlayerLand {
     @Schema(description = "作物处于第几季")
     @Column(name = "growth_season")
     private int growthSeason;
+
+    public PlayerLandDTO toDTO() {
+        return new PlayerLandDTO(
+                this.id,
+                this.landType,
+                this.seed != null ? this.seed.toDTO() : null,
+                this.growthCharacteristic != null ? this.growthCharacteristic.toDTO() : null,
+                this.pestInfestation,
+                this.plantingTime,
+                this.harvestableQuantity,
+                this.growthSeason
+        );
+    }
 }

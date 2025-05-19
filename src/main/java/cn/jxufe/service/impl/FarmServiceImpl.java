@@ -5,8 +5,9 @@ import cn.jxufe.model.dto.Message;
 import cn.jxufe.model.dto.PlayerLandDTO;
 import cn.jxufe.model.entity.*;
 import cn.jxufe.model.enums.CropStatus;
+import cn.jxufe.model.enums.FarmAction;
+import cn.jxufe.model.enums.SoundType;
 import cn.jxufe.repository.*;
-import cn.jxufe.service.AuthService;
 import cn.jxufe.service.FarmService;
 import cn.jxufe.ws.NativeWebSocketServer;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,6 @@ public class FarmServiceImpl implements FarmService {
     private final PlayerSeedRepository playerSeedRepository;
     private final GrowthCharacteristicRepository growthCharacteristicRepository;
     private final SeedRepository seedRepository;
-    private final AuthService authService;
 
     @Override
     @Transactional(readOnly = true)
@@ -54,7 +54,7 @@ public class FarmServiceImpl implements FarmService {
         PlayerLand land = validatePlayerAndLand(landId, playerId);
 
         if (land.getSeed() != null) {
-            Message msg = new Message(-1, "plant", "土地上已经有作物了", "taunt");
+            Message msg = new Message(-1, FarmAction.PLANT, "土地上已经有作物了", SoundType.FAIL);
 
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
@@ -64,7 +64,7 @@ public class FarmServiceImpl implements FarmService {
         Seed seed = seedRepository.findById(seedId)
                 .orElse(null);
         if (seed == null) {
-            Message msg = new Message(-1, "plant", "种子不存在", "taunt");
+            Message msg = new Message(-1, FarmAction.PLANT, "种子不存在", SoundType.FAIL);
 
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
@@ -72,7 +72,7 @@ public class FarmServiceImpl implements FarmService {
 
         // 验证土地类型
         if (land.getLandType() != seed.getLandRequirement()) {
-            Message msg = new Message(-1, "plant", "土地类型不符合种子要求", "taunt");
+            Message msg = new Message(-1, FarmAction.PLANT, "土地类型不符合种子要求", SoundType.FAIL);
 
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
@@ -83,13 +83,13 @@ public class FarmServiceImpl implements FarmService {
                 .orElse(null);
 
         if (playerSeed == null) {
-            Message msg = new Message(-1, "plant", "玩家没有该种子", "taunt");
+            Message msg = new Message(-1, FarmAction.PLANT, "玩家没有该种子", SoundType.FAIL);
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
         }
 
         if (playerSeed.getQuantity() < 1) {
-            Message msg = new Message(-1, "plant", "种子数量不足", "taunt");
+            Message msg = new Message(-1, FarmAction.PLANT, "种子数量不足", SoundType.FAIL);
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
         }
@@ -99,7 +99,7 @@ public class FarmServiceImpl implements FarmService {
                 .findBySeed_IdAndCropStatus(seedId, CropStatus.SEED)
                 .orElse(null);
         if (growthCharacteristic == null) {
-            Message msg = new Message(-1, "plant", "该作物不存在种子阶段", "taunt");
+            Message msg = new Message(-1, FarmAction.PLANT, "该作物不存在种子阶段", SoundType.FAIL);
 
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
@@ -116,7 +116,7 @@ public class FarmServiceImpl implements FarmService {
         playerSeedRepository.save(playerSeed);
         playerLandRepository.save(land);
 
-        Message msg = new Message(1, "plant", "种植成功", "success");
+        Message msg = new Message(1, FarmAction.PLANT, "种植成功", SoundType.SUCCESS);
 
         NativeWebSocketServer.pushToPlayer(playerId, msg);
         return msg;
@@ -129,7 +129,7 @@ public class FarmServiceImpl implements FarmService {
 
         // 验证虫害状态
         if (!land.isPestInfestation()) {
-            Message msg = new Message(-1, "killWorm", "该土地没有虫害", "taunt");
+            Message msg = new Message(-1, FarmAction.KILL_WORM, "该土地没有虫害", SoundType.FAIL);
 
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
@@ -148,10 +148,10 @@ public class FarmServiceImpl implements FarmService {
         playerLandRepository.save(land);
 
         Message msg = new Message(
-                1, "killWorm", String.format(
+                1, FarmAction.KILL_WORM, String.format(
                 "除虫成功<br>经验值：%d<br>金币：%d<br>总积分：%d",
                 experiencePoints, goldCoins, totalPoints
-        ), "success"
+        ), SoundType.SUCCESS, land.toDTO()
         );
 
         NativeWebSocketServer.pushToPlayer(playerId, msg);
@@ -164,7 +164,7 @@ public class FarmServiceImpl implements FarmService {
 
         // 验证土地状态
         if (land.getSeed() == null) {
-            Message msg = new Message(-1, "harvest", "土地上没有作物", "taunt");
+            Message msg = new Message(-1, FarmAction.HARVEST, "土地上没有作物", SoundType.FAIL);
 
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
@@ -172,7 +172,7 @@ public class FarmServiceImpl implements FarmService {
 
         // 验证作物状态
         if (land.getGrowthCharacteristic().getCropStatus() != CropStatus.READY_TO_HARVEST) {
-            Message msg = new Message(-1, "harvest", "作物未成熟或已收获", "taunt");
+            Message msg = new Message(-1, FarmAction.HARVEST, "作物未成熟或已收获", SoundType.FAIL);
 
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
@@ -207,13 +207,13 @@ public class FarmServiceImpl implements FarmService {
                             .orElseThrow(() -> new ResourceNotFoundException("作物无枯草阶段")));
         }
 
-        playerLandRepository.save(land);
+        PlayerLand playerLand = playerLandRepository.save(land);
 
         Message msg = new Message(
-                1, "harvest", String.format(
+                1, FarmAction.HARVEST, String.format(
                 "收获成功<br>经验值：%d<br>金币：%d<br>总积分：%d",
                 experiencePoints, goldCoins, totalPoints
-        ), "success"
+        ), SoundType.SUCCESS, playerLand.toDTO()
         );
 
         NativeWebSocketServer.pushToPlayer(playerId, msg);
@@ -226,7 +226,7 @@ public class FarmServiceImpl implements FarmService {
 
         if (land.getGrowthCharacteristic() == null
                 || land.getGrowthCharacteristic().getCropStatus() != CropStatus.HARVESTED) {
-            Message msg = new Message(-1, "cleanLand", "土地上没有枯草", "taunt");
+            Message msg = new Message(-1, FarmAction.CLEAN, "土地上没有枯草", SoundType.FAIL);
 
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
@@ -248,10 +248,10 @@ public class FarmServiceImpl implements FarmService {
         playerLandRepository.save(land);
 
         Message msg = new Message(
-                1, "cleanLand", String.format(
+                1, FarmAction.CLEAN, String.format(
                 "清理成功<br>经验值：%d<br>总积分：%d",
                 experiencePoints, totalPoints
-        ), "success"
+        ), SoundType.SUCCESS, land.toDTO()
         );
 
         NativeWebSocketServer.pushToPlayer(playerId, msg);
