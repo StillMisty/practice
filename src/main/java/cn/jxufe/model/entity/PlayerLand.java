@@ -29,13 +29,13 @@ public class PlayerLand {
     private LandType landType;
 
     @Schema(description = "所种植的种子")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "seed_id")
     @ToString.Exclude
     private Seed seed;
 
     @Schema(description = "当前生长阶段")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "growth_characteristic_id")
     @ToString.Exclude
     private GrowthCharacteristic growthCharacteristic;

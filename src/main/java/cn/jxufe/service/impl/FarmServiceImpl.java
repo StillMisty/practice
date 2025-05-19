@@ -1,13 +1,21 @@
 package cn.jxufe.service.impl;
 
 import cn.jxufe.exception.ResourceNotFoundException;
+import cn.jxufe.model.dto.Message;
+import cn.jxufe.model.dto.PlayerLandDTO;
 import cn.jxufe.model.entity.*;
 import cn.jxufe.model.enums.CropStatus;
 import cn.jxufe.repository.*;
+import cn.jxufe.service.AuthService;
 import cn.jxufe.service.FarmService;
+import cn.jxufe.ws.NativeWebSocketServer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,26 +25,57 @@ public class FarmServiceImpl implements FarmService {
     private final PlayerSeedRepository playerSeedRepository;
     private final GrowthCharacteristicRepository growthCharacteristicRepository;
     private final SeedRepository seedRepository;
+    private final AuthService authService;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlayerLandDTO> getPlayerLands(Long playerId) {
+        return playerRepository.findById(playerId)
+                .orElseThrow(() -> new IllegalArgumentException("玩家不存在"))
+                .getLands()
+                .stream()
+                .sorted(Comparator.comparing(PlayerLand::getId)) // 按照 ID 升序排序
+                .map(playerLand -> new PlayerLandDTO(
+                        playerLand.getId(),
+                        playerLand.getLandType(),
+                        playerLand.getSeed() != null ? playerLand.getSeed().toDTO() : null,
+                        playerLand.getGrowthCharacteristic() != null ? playerLand.getGrowthCharacteristic().toDTO() : null,
+                        playerLand.isPestInfestation(),
+                        playerLand.getPlantingTime(),
+                        playerLand.getHarvestableQuantity(),
+                        playerLand.getGrowthSeason()
+                ))
+                .collect(Collectors.toList());
+    }
 
     @Override
     @Transactional
-    public String actionPlant(Long landId, Long seedId, Long playerId) {
+    public Message actionPlant(Long landId, Long seedId, Long playerId) {
         PlayerLand land = validatePlayerAndLand(landId, playerId);
 
         if (land.getSeed() != null) {
-            return "土地上已经有作物了";
+            Message msg = new Message(-1, "plant", "土地上已经有作物了", "taunt");
+
+            NativeWebSocketServer.pushToPlayer(playerId, msg);
+            return msg;
         }
 
         // 验证种子
         Seed seed = seedRepository.findById(seedId)
                 .orElse(null);
         if (seed == null) {
-            return "种子不存在";
+            Message msg = new Message(-1, "plant", "种子不存在", "taunt");
+
+            NativeWebSocketServer.pushToPlayer(playerId, msg);
+            return msg;
         }
 
         // 验证土地类型
         if (land.getLandType() != seed.getLandRequirement()) {
-            return "土地类型不符合种子要求";
+            Message msg = new Message(-1, "plant", "土地类型不符合种子要求", "taunt");
+
+            NativeWebSocketServer.pushToPlayer(playerId, msg);
+            return msg;
         }
 
         // 验证种子数量
@@ -44,18 +83,26 @@ public class FarmServiceImpl implements FarmService {
                 .orElse(null);
 
         if (playerSeed == null) {
-            return "玩家没有该种子";
+            Message msg = new Message(-1, "plant", "玩家没有该种子", "taunt");
+            NativeWebSocketServer.pushToPlayer(playerId, msg);
+            return msg;
         }
 
         if (playerSeed.getQuantity() < 1) {
-            return "种子数量不足";
+            Message msg = new Message(-1, "plant", "种子数量不足", "taunt");
+            NativeWebSocketServer.pushToPlayer(playerId, msg);
+            return msg;
         }
 
         // 获取种子阶段
-        GrowthCharacteristic growthCharacteristic = growthCharacteristicRepository.findBySeed_IdAndCropStatus(seedId, CropStatus.SEED)
+        GrowthCharacteristic growthCharacteristic = growthCharacteristicRepository
+                .findBySeed_IdAndCropStatus(seedId, CropStatus.SEED)
                 .orElse(null);
         if (growthCharacteristic == null) {
-            return "该作物不存在种子阶段";
+            Message msg = new Message(-1, "plant", "该作物不存在种子阶段", "taunt");
+
+            NativeWebSocketServer.pushToPlayer(playerId, msg);
+            return msg;
         }
 
         // 播种操作
@@ -69,17 +116,23 @@ public class FarmServiceImpl implements FarmService {
         playerSeedRepository.save(playerSeed);
         playerLandRepository.save(land);
 
-        return "种植成功";
+        Message msg = new Message(1, "plant", "种植成功", "success");
+
+        NativeWebSocketServer.pushToPlayer(playerId, msg);
+        return msg;
     }
 
     @Override
     @Transactional
-    public String actionKillWorm(Long landId, Long playerId) {
+    public Message actionKillWorm(Long landId, Long playerId) {
         PlayerLand land = validatePlayerAndLand(landId, playerId);
 
         // 验证虫害状态
         if (!land.isPestInfestation()) {
-            return "该土地没有虫害";
+            Message msg = new Message(-1, "killWorm", "该土地没有虫害", "taunt");
+
+            NativeWebSocketServer.pushToPlayer(playerId, msg);
+            return msg;
         }
 
         // 除虫操作
@@ -94,24 +147,35 @@ public class FarmServiceImpl implements FarmService {
 
         playerLandRepository.save(land);
 
-        return String.format(
+        Message msg = new Message(
+                1, "killWorm", String.format(
                 "除虫成功<br>经验值：%d<br>金币：%d<br>总积分：%d",
                 experiencePoints, goldCoins, totalPoints
+        ), "success"
         );
+
+        NativeWebSocketServer.pushToPlayer(playerId, msg);
+        return msg;
     }
 
     @Override
-    public String actionHarvest(Long landId, Long playerId) {
+    public Message actionHarvest(Long landId, Long playerId) {
         PlayerLand land = validatePlayerAndLand(landId, playerId);
 
         // 验证土地状态
         if (land.getSeed() == null) {
-            return "土地上没有作物";
+            Message msg = new Message(-1, "harvest", "土地上没有作物", "taunt");
+
+            NativeWebSocketServer.pushToPlayer(playerId, msg);
+            return msg;
         }
 
         // 验证作物状态
         if (land.getGrowthCharacteristic().getCropStatus() != CropStatus.READY_TO_HARVEST) {
-            return "作物未成熟或已收获";
+            Message msg = new Message(-1, "harvest", "作物未成熟或已收获", "taunt");
+
+            NativeWebSocketServer.pushToPlayer(playerId, msg);
+            return msg;
         }
 
         // 收获操作
@@ -126,8 +190,15 @@ public class FarmServiceImpl implements FarmService {
 
         // 判断为几季节作物
         if (land.getGrowthSeason() < seed.getGrowthSeasonCount()) {
-            // 可以继续生长
+            // 可以继续生长，季节+1
             land.setGrowthSeason(land.getGrowthSeason() + 1);
+            // 进入种子阶段
+            land.setGrowthCharacteristic(
+                    growthCharacteristicRepository
+                            .findBySeed_IdAndCropStatus(seed.getId(), CropStatus.SEED)
+                            .orElseThrow(() -> new ResourceNotFoundException("作物无种子阶段")));
+            // 重新设置可收获数量
+            land.setHarvestableQuantity(seed.getHarvestYield());
         } else {
             // 作物完全收割，进入枯草阶段
             land.setGrowthCharacteristic(
@@ -138,18 +209,27 @@ public class FarmServiceImpl implements FarmService {
 
         playerLandRepository.save(land);
 
-        return String.format(
+        Message msg = new Message(
+                1, "harvest", String.format(
                 "收获成功<br>经验值：%d<br>金币：%d<br>总积分：%d",
                 experiencePoints, goldCoins, totalPoints
+        ), "success"
         );
+
+        NativeWebSocketServer.pushToPlayer(playerId, msg);
+        return msg;
     }
 
     @Override
-    public String actionCleanLand(Long landId, Long playerId) {
+    public Message actionCleanLand(Long landId, Long playerId) {
         PlayerLand land = validatePlayerAndLand(landId, playerId);
 
-        if (land.getGrowthCharacteristic().getCropStatus() != CropStatus.HARVESTED) {
-            return "土地上没有枯草";
+        if (land.getGrowthCharacteristic() == null
+                || land.getGrowthCharacteristic().getCropStatus() != CropStatus.HARVESTED) {
+            Message msg = new Message(-1, "cleanLand", "土地上没有枯草", "taunt");
+
+            NativeWebSocketServer.pushToPlayer(playerId, msg);
+            return msg;
         }
 
         // 清理土地操作
@@ -167,12 +247,16 @@ public class FarmServiceImpl implements FarmService {
 
         playerLandRepository.save(land);
 
-        return String.format(
+        Message msg = new Message(
+                1, "cleanLand", String.format(
                 "清理成功<br>经验值：%d<br>总积分：%d",
                 experiencePoints, totalPoints
+        ), "success"
         );
-    }
 
+        NativeWebSocketServer.pushToPlayer(playerId, msg);
+        return msg;
+    }
 
     private PlayerLand validatePlayerAndLand(Long landId, Long playerId) {
         Player player = playerRepository.findById(playerId)
