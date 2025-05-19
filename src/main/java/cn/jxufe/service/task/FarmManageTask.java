@@ -1,6 +1,7 @@
 package cn.jxufe.service.task;
 
 import cn.jxufe.model.dto.Message;
+import cn.jxufe.model.dto.PlayerLandDTO;
 import cn.jxufe.model.entity.PlayerLand;
 import cn.jxufe.model.enums.CropStatus;
 import cn.jxufe.model.enums.FarmAction;
@@ -8,7 +9,6 @@ import cn.jxufe.model.enums.SoundType;
 import cn.jxufe.repository.GrowthCharacteristicRepository;
 import cn.jxufe.repository.PlayerLandRepository;
 import cn.jxufe.ws.NativeWebSocketServer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,6 @@ public class FarmManageTask {
     private final PlayerLandRepository playerLandRepository;
     private final GrowthCharacteristicRepository growthCharacteristicRepository;
     private final Random random = new Random();
-    private final ObjectMapper objectMapper;
 
     // 每2秒执行一次
     @Scheduled(fixedRate = 2000)
@@ -50,7 +49,11 @@ public class FarmManageTask {
                                 int harvestableQuantity = land.getHarvestableQuantity();
                                 int reducedQuantity = (int) (harvestableQuantity * (0.1 + random.nextDouble() * 0.4));
                                 land.setHarvestableQuantity(land.getHarvestableQuantity() - reducedQuantity);
-                                Message msg = new Message(
+                                // 如果减产后可收获数量小于 1，则设置为 1
+                                if (land.getHarvestableQuantity() < 1) {
+                                    land.setHarvestableQuantity(1);
+                                }
+                                Message<PlayerLandDTO> msg = Message.of(
                                         -1,
                                         FarmAction.KILL_WORM,
                                         "虫害导致减产，请及时处理！",
@@ -64,7 +67,7 @@ public class FarmManageTask {
                             if (!land.isPestInfestation() && gc.getPestInfestationProbability() > 0
                                     && random.nextDouble() < gc.getPestInfestationProbability()) {
                                 land.setPestInfestation(true);
-                                Message msg = new Message(
+                                Message<PlayerLandDTO> msg = Message.of(
                                         -1,
                                         FarmAction.PEST_INFESTATION,
                                         "土地发生虫害，请及时处理！",
@@ -75,14 +78,14 @@ public class FarmManageTask {
                             }
 
                             // 推送作物状态更新消息，不显示提示框
-                            Message msg = new Message(
+                            Message<PlayerLandDTO> msg = Message.of(
                                     1,
                                     FarmAction.CROP_STATUS_UPDATE,
                                     "作物状态更新",
                                     SoundType.SUCCESS,
-                                    land.toDTO(),
-                                    false
+                                    land.toDTO()
                             );
+                            msg.setShowDialog(false);
                             NativeWebSocketServer.pushToPlayer(Long.valueOf(playerId), msg);
                         });
                 playerLandRepository.save(land);
