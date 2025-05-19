@@ -1,5 +1,6 @@
 package cn.jxufe.model.entity;
 
+import cn.jxufe.model.dto.GrowthCharacteristicDTO;
 import cn.jxufe.model.enums.CropStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -86,5 +87,20 @@ public class GrowthCharacteristic {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    public GrowthCharacteristicDTO toDTO() {
+        GrowthCharacteristicDTO growthCharacteristicDTO = new GrowthCharacteristicDTO();
+        growthCharacteristicDTO.setId(this.id);
+        growthCharacteristicDTO.setGrowthStage(this.growthStage);
+        growthCharacteristicDTO.setGrowthStageTitle(this.growthStageTitle);
+        growthCharacteristicDTO.setStageGrowthTime(this.stageGrowthTime);
+        growthCharacteristicDTO.setPestInfestationProbability(this.pestInfestationProbability);
+        growthCharacteristicDTO.setImageWidth(this.imageWidth);
+        growthCharacteristicDTO.setImageHeight(this.imageHeight);
+        growthCharacteristicDTO.setImageOffsetX(this.imageOffsetX);
+        growthCharacteristicDTO.setImageOffsetY(this.imageOffsetY);
+        growthCharacteristicDTO.setCropStatus(this.cropStatus);
+        return growthCharacteristicDTO;
     }
 }

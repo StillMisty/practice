@@ -32,7 +32,7 @@ public class PlayerSeedServiceImpl implements PlayerSeedService {
         Seed seed = seedRepository.findById(seedId).orElseThrow(() -> new ResourceNotFoundException("找不到种子"));
 
         // 计算总价
-        Long totalCost = seed.getSeedPurchasePrice() * quantity;
+        long totalCost = seed.getSeedPurchasePrice() * quantity;
 
         // 检查玩家金币是否足够
         if (player.getGoldCoins() < totalCost) {

@@ -1,15 +1,18 @@
 package cn.jxufe.model.entity;
 
+import cn.jxufe.model.dto.SeedDTO;
 import cn.jxufe.model.enums.LandType;
 import cn.jxufe.model.enums.SeedType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name = "seed")
@@ -95,5 +98,24 @@ public class Seed {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    public SeedDTO toDTO() {
+        SeedDTO seedDTO = new SeedDTO();
+        seedDTO.setId(this.id);
+        seedDTO.setSeedName(this.seedName);
+        seedDTO.setGrowthSeasonCount(this.growthSeasonCount);
+        seedDTO.setSeedLevel(this.seedLevel);
+        seedDTO.setSeedType(this.seedType);
+        seedDTO.setExperience(this.experience);
+        seedDTO.setPoints(this.points);
+        seedDTO.setHarvestYield(this.harvestYield);
+        seedDTO.setGrowthTimePerSeason(this.growthTimePerSeason);
+        seedDTO.setSeedPurchasePrice(this.seedPurchasePrice);
+        seedDTO.setFruitPricePerUnit(this.fruitPricePerUnit);
+        seedDTO.setLandRequirement(this.landRequirement);
+        seedDTO.setPlantingTip(this.plantingTip);
+
+        return seedDTO;
     }
 }

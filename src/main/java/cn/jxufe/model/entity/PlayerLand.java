@@ -16,7 +16,7 @@ import lombok.ToString;
 public class PlayerLand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "玩家土地 ID")
+    @Schema(description = "土地 ID")
     private Long id;
 
     @Schema(description = "玩家")

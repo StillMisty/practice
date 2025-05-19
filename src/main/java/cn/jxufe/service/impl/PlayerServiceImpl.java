@@ -93,6 +93,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Path getPlayerAvatar(Long id) {
         Player player = playerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("玩家不存在，ID: " + id));

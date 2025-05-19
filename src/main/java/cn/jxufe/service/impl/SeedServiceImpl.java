@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class SeedServiceImpl implements SeedService {
     public SeedDTO createSeed(SeedDTO seedDTO) {
         Seed seed = convertToEntity(seedDTO);
         Seed savedSeed = seedRepository.save(seed);
-        return convertToDTO(savedSeed);
+        return savedSeed.toDTO();
     }
 
     @Override
@@ -48,7 +49,7 @@ public class SeedServiceImpl implements SeedService {
 
         updateSeedFromDTO(existingSeed, seedDTO);
         Seed updatedSeed = seedRepository.save(existingSeed);
-        return convertToDTO(updatedSeed);
+        return updatedSeed.toDTO();
     }
 
     @Override
@@ -65,7 +66,7 @@ public class SeedServiceImpl implements SeedService {
         String imagePath = fileStorageService.storeFile(file, "seeds");
         existingSeed.setImagePath(imagePath);
         Seed updatedSeed = seedRepository.save(existingSeed);
-        return convertToDTO(updatedSeed);
+        return updatedSeed.toDTO();
     }
 
     @Override
@@ -102,21 +103,21 @@ public class SeedServiceImpl implements SeedService {
     public SeedDTO getSeedById(Long seedId) {
         Seed seed = seedRepository.findById(seedId)
                 .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
-        return convertToDTO(seed);
+        return seed.toDTO();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<SeedDTO> getAllSeeds(Pageable pageable) {
         return seedRepository.findAll(pageable)
-                .map(this::convertToDTO);
+                .map(Seed::toDTO);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<SeedDTO> searchSeedsByName(String seedName) {
         return seedRepository.findBySeedNameContaining(seedName).stream()
-                .map(this::convertToDTO)
+                .map(Seed::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -124,7 +125,7 @@ public class SeedServiceImpl implements SeedService {
     @Transactional(readOnly = true)
     public List<SeedDTO> findSeedsByType(SeedType seedType) {
         return seedRepository.findBySeedType(seedType).stream()
-                .map(this::convertToDTO)
+                .map(Seed::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -132,7 +133,7 @@ public class SeedServiceImpl implements SeedService {
     @Transactional(readOnly = true)
     public List<SeedDTO> findSeedsByLevel(int seedLevel) {
         return seedRepository.findBySeedLevel(seedLevel).stream()
-                .map(this::convertToDTO)
+                .map(Seed::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -140,7 +141,7 @@ public class SeedServiceImpl implements SeedService {
     @Transactional(readOnly = true)
     public List<SeedDTO> findSeedsByLandRequirement(LandType landType) {
         return seedRepository.findByLandRequirement(landType).stream()
-                .map(this::convertToDTO)
+                .map(Seed::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -148,7 +149,7 @@ public class SeedServiceImpl implements SeedService {
     @Transactional(readOnly = true)
     public List<SeedDTO> findSeedsByPriceRange(double minPrice, double maxPrice) {
         return seedRepository.findBySeedPurchasePriceBetween(minPrice, maxPrice).stream()
-                .map(this::convertToDTO)
+                .map(Seed::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -156,14 +157,14 @@ public class SeedServiceImpl implements SeedService {
     @Transactional(readOnly = true)
     public List<SeedDTO> getAllSeedsOrderByPrice() {
         return seedRepository.findByOrderBySeedPurchasePriceAsc().stream()
-                .map(this::convertToDTO)
+                .map(Seed::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<SeedTypeResponse> getAllSeedTypes() {
-        return List.of(SeedType.values()).stream()
+        return Stream.of(SeedType.values())
                 .map(type -> new SeedTypeResponse(type.name(), type.getChineseName(),type.getGrade()))
                 .collect(Collectors.toList());
     }
@@ -173,25 +174,6 @@ public class SeedServiceImpl implements SeedService {
         Seed seed = new Seed();
         updateSeedFromDTO(seed, seedDTO);
         return seed;
-    }
-
-    // 辅助方法：将实体转换为 DTO
-    private SeedDTO convertToDTO(Seed seed) {
-        SeedDTO dto = new SeedDTO();
-        dto.setId(seed.getId());
-        dto.setSeedName(seed.getSeedName());
-        dto.setGrowthSeasonCount(seed.getGrowthSeasonCount());
-        dto.setSeedLevel(seed.getSeedLevel());
-        dto.setSeedType(seed.getSeedType());
-        dto.setExperience(seed.getExperience());
-        dto.setPoints(seed.getPoints());
-        dto.setHarvestYield(seed.getHarvestYield());
-        dto.setGrowthTimePerSeason(seed.getGrowthTimePerSeason());
-        dto.setSeedPurchasePrice(seed.getSeedPurchasePrice());
-        dto.setFruitPricePerUnit(seed.getFruitPricePerUnit());
-        dto.setLandRequirement(seed.getLandRequirement());
-        dto.setPlantingTip(seed.getPlantingTip());
-        return dto;
     }
 
     // 辅助方法：从 DTO 更新实体
