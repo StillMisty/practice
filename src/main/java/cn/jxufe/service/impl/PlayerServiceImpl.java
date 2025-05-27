@@ -151,7 +151,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional(readOnly = true)
     public List<PlayerDTO> getPlayersByExperienceRanking() {
-        return playerRepository.findAllByOrderByExperiencePointsDesc().stream()
+        return playerRepository.findTop20AllByOrderByExperiencePointsDesc().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -159,7 +159,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional(readOnly = true)
     public List<PlayerDTO> getPlayersByGoldCoinsRanking() {
-        return playerRepository.findAllByOrderByGoldCoinsDesc().stream()
+        return playerRepository.findTop20AllByOrderByGoldCoinsDesc().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -167,7 +167,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional(readOnly = true)
     public List<PlayerDTO> getPlayersByPointsRanking() {
-        return playerRepository.findAllByOrderByTotalPointsDesc().stream()
+        return playerRepository.findTop20AllByOrderByTotalPointsDesc().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
