@@ -8,10 +8,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum CropStatus {
-    SEED("种子"),
-    GROWING("生长中"),
-    READY_TO_HARVEST("成熟"),
-    HARVESTED("已收获");
+    SEED("种子阶段"),
+    GROWING("生长阶段"),
+    READY_TO_HARVEST("成熟阶段"),
+    HARVESTED("枯草阶段");
 
     private final String chineseName;
 }
