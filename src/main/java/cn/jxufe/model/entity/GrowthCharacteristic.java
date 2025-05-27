@@ -90,17 +90,18 @@ public class GrowthCharacteristic {
     }
 
     public GrowthCharacteristicDTO toDTO() {
-        GrowthCharacteristicDTO growthCharacteristicDTO = new GrowthCharacteristicDTO();
-        growthCharacteristicDTO.setId(this.id);
-        growthCharacteristicDTO.setGrowthStage(this.growthStage);
-        growthCharacteristicDTO.setGrowthStageTitle(this.growthStageTitle);
-        growthCharacteristicDTO.setStageGrowthTime(this.stageGrowthTime);
-        growthCharacteristicDTO.setPestInfestationProbability(this.pestInfestationProbability);
-        growthCharacteristicDTO.setImageWidth(this.imageWidth);
-        growthCharacteristicDTO.setImageHeight(this.imageHeight);
-        growthCharacteristicDTO.setImageOffsetX(this.imageOffsetX);
-        growthCharacteristicDTO.setImageOffsetY(this.imageOffsetY);
-        growthCharacteristicDTO.setCropStatus(this.cropStatus);
-        return growthCharacteristicDTO;
+        return new GrowthCharacteristicDTO(
+                this.id,
+                this.growthStage,
+                this.growthStageTitle,
+                this.stageGrowthTime,
+                this.pestInfestationProbability,
+                this.imageWidth,
+                this.imageHeight,
+                this.imageOffsetX,
+                this.imageOffsetY,
+                this.cropStatus,
+                this.seed != null ? this.seed.getId() : null
+        );
     }
 }
