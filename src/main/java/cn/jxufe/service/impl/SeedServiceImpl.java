@@ -6,11 +6,11 @@ import cn.jxufe.model.dto.SeedTypeResponse;
 import cn.jxufe.model.entity.Seed;
 import cn.jxufe.model.enums.LandType;
 import cn.jxufe.model.enums.SeedType;
+import cn.jxufe.repository.PlayerRepository;
 import cn.jxufe.repository.SeedRepository;
+import cn.jxufe.service.AuthService;
 import cn.jxufe.service.FileStorageService;
 import cn.jxufe.service.SeedService;
-import cn.jxufe.repository.PlayerRepository;
-import cn.jxufe.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,7 +55,8 @@ public class SeedServiceImpl implements SeedService {
     @Override
     public SeedDTO updateSeedImage(
             Long seedId,
-            MultipartFile file) throws IOException {
+            MultipartFile file
+    ) throws IOException {
         Seed existingSeed = seedRepository.findById(seedId)
                 .orElseThrow(() -> new ResourceNotFoundException("种子不存在，ID: " + seedId));
 
@@ -115,10 +116,9 @@ public class SeedServiceImpl implements SeedService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SeedDTO> searchSeedsByName(String seedName) {
-        return seedRepository.findBySeedNameContaining(seedName).stream()
-                .map(Seed::toDTO)
-                .collect(Collectors.toList());
+    public Page<SeedDTO> searchSeedsByName(String seedName, Pageable pageable) {
+        return seedRepository.findBySeedNameContaining(seedName, pageable)
+                .map(Seed::toDTO);
     }
 
     @Override
@@ -165,7 +165,7 @@ public class SeedServiceImpl implements SeedService {
     @Transactional(readOnly = true)
     public List<SeedTypeResponse> getAllSeedTypes() {
         return Stream.of(SeedType.values())
-                .map(type -> new SeedTypeResponse(type.name(), type.getChineseName(),type.getGrade()))
+                .map(type -> new SeedTypeResponse(type.name(), type.getChineseName(), type.getGrade()))
                 .collect(Collectors.toList());
     }
 

@@ -116,7 +116,7 @@ public class FarmServiceImpl implements FarmService {
         playerSeedRepository.save(playerSeed);
         playerLandRepository.save(land);
 
-        Message<?> msg = Message.of(1, FarmAction.PLANT, "种植成功", SoundType.SUCCESS);
+        Message<?> msg = Message.of(1, FarmAction.PLANT, "种植成功", SoundType.SUCCESS, land.toDTO());
 
         NativeWebSocketServer.pushToPlayer(playerId, msg);
         return msg;

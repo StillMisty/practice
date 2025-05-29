@@ -2,6 +2,7 @@ package cn.jxufe.repository;
 
 import cn.jxufe.model.entity.GrowthCharacteristic;
 import cn.jxufe.model.enums.CropStatus;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +13,7 @@ import java.util.Optional;
 public interface GrowthCharacteristicRepository extends JpaRepository<GrowthCharacteristic, Long> {
 
     // 根据种子ID查找生长特性
-    List<GrowthCharacteristic> findBySeedId(Long seedId);
+    List<GrowthCharacteristic> findBySeedId(Long seedId, Sort sort);
 
     // 根据生长阶段查找
     List<GrowthCharacteristic> findByGrowthStage(int growthStage);

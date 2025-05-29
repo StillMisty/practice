@@ -1,6 +1,5 @@
 package cn.jxufe.controller;
 
-import cn.jxufe.model.dto.LandTypeResponse;
 import cn.jxufe.model.dto.SeedDTO;
 import cn.jxufe.model.dto.SeedTypeResponse;
 import cn.jxufe.model.enums.LandType;
@@ -70,8 +69,11 @@ public class SeedController {
             @Parameter(description = "页码，从0开始") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "排序所依据的数据库中字段名") @RequestParam(defaultValue = "id") String sortBy,
-            @Parameter(description = "排序方向") Sort.Direction sortDirection
+            @Parameter(description = "排序方向") @RequestParam(required = false) Sort.Direction sortDirection
     ) {
+        if (sortDirection == null) {
+            sortDirection = Sort.Direction.ASC; // 默认排序方向为升序
+        }
         Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         return ResponseEntity.ok(seedService.getAllSeeds(pageable));
@@ -79,10 +81,15 @@ public class SeedController {
 
     @GetMapping("/search")
     @Operation(summary = "按名称搜索种子", description = "根据种子名称进行模糊搜索")
-    public ResponseEntity<List<SeedDTO>> searchSeedsByName(
-            @Parameter(description = "种子名称关键字") @RequestParam String name
+    public ResponseEntity<Page<SeedDTO>> searchSeedsByName(
+            @Parameter(description = "种子名称关键字") @RequestParam String name,
+            @Parameter(description = "页码，从0开始") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "排序所依据的数据库中字段名") @RequestParam(defaultValue = "id") String sortBy
     ) {
-        return ResponseEntity.ok(seedService.searchSeedsByName(name));
+        Sort sort = Sort.by(Sort.Direction.ASC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return ResponseEntity.ok(seedService.searchSeedsByName(name, pageable));
     }
 
     @GetMapping("/type/{seedType}")

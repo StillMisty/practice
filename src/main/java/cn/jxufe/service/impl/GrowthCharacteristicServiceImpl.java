@@ -13,6 +13,7 @@ import cn.jxufe.service.GrowthCharacteristicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -126,8 +127,8 @@ public class GrowthCharacteristicServiceImpl implements GrowthCharacteristicServ
 
     @Override
     @Transactional(readOnly = true)
-    public List<GrowthCharacteristicDTO> getGrowthCharacteristicsBySeedId(Long seedId) {
-        return growthCharacteristicRepository.findBySeedId(seedId).stream()
+    public List<GrowthCharacteristicDTO> getGrowthCharacteristicsBySeedId(Long seedId, Sort sort) {
+        return growthCharacteristicRepository.findBySeedId(seedId, sort).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }

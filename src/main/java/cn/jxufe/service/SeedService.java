@@ -44,7 +44,7 @@ public interface SeedService {
         Page<SeedDTO> getAllSeeds(Pageable pageable);
 
         // 根据名称搜索种子
-        List<SeedDTO> searchSeedsByName(String seedName);
+        Page<SeedDTO> searchSeedsByName(String seedName, Pageable pageable);
 
         // 根据种子类型查找
         List<SeedDTO> findSeedsByType(SeedType seedType);

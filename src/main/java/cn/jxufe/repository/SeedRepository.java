@@ -3,6 +3,8 @@ package cn.jxufe.repository;
 import cn.jxufe.model.entity.Seed;
 import cn.jxufe.model.enums.LandType;
 import cn.jxufe.model.enums.SeedType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +14,7 @@ import java.util.List;
 public interface SeedRepository extends JpaRepository<Seed, Long> {
 
     // 根据名称查找
-    List<Seed> findBySeedNameContaining(String seedName);
+    Page<Seed> findBySeedNameContaining(String seedName, Pageable pageable);
 
     // 根据种子类型查找
     List<Seed> findBySeedType(SeedType seedType);
