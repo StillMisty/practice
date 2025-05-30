@@ -34,5 +34,8 @@ public interface GrowthCharacteristicRepository extends JpaRepository<GrowthChar
     List<GrowthCharacteristic> findBySeedIdOrderByGrowthStageAsc(Long seedId);
 
     // 查询特定种子的特定作物状态
-    Optional<GrowthCharacteristic> findBySeed_IdAndCropStatus(Long id, CropStatus cropStatus);
+    List<GrowthCharacteristic> findBySeed_IdAndCropStatusOrderByGrowthStageAsc(Long id, CropStatus cropStatus);
+
+    // 查询特定种子的特定作物状态和生长阶段
+    Optional<GrowthCharacteristic> findBySeed_IdAndCropStatusAndGrowthStage(Long id, CropStatus cropStatus, int growthStage);
 }

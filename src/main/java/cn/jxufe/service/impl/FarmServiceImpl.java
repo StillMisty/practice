@@ -96,11 +96,9 @@ public class FarmServiceImpl implements FarmService {
 
         // 获取种子阶段
         GrowthCharacteristic growthCharacteristic = growthCharacteristicRepository
-                .findBySeed_IdAndCropStatus(seedId, CropStatus.SEED)
-                .orElse(null);
+                .findBySeed_IdAndCropStatusOrderByGrowthStageAsc(seedId, CropStatus.SEED).stream().findFirst().orElse(null);
         if (growthCharacteristic == null) {
             Message<?> msg = Message.of(-1, FarmAction.PLANT, "该作物不存在种子阶段", SoundType.FAIL);
-
             NativeWebSocketServer.pushToPlayer(playerId, msg);
             return msg;
         }
@@ -195,16 +193,21 @@ public class FarmServiceImpl implements FarmService {
             // 进入种子阶段
             land.setGrowthCharacteristic(
                     growthCharacteristicRepository
-                            .findBySeed_IdAndCropStatus(seed.getId(), CropStatus.SEED)
-                            .orElseThrow(() -> new ResourceNotFoundException("作物无种子阶段")));
+                            .findBySeed_IdAndCropStatusOrderByGrowthStageAsc(seed.getId(), CropStatus.SEED)
+                            .stream().findFirst().orElseThrow(
+                                    () -> new ResourceNotFoundException("作物无种子阶段")
+                            ));
+
             // 重新设置可收获数量
             land.setHarvestableQuantity(seed.getHarvestYield());
         } else {
             // 作物完全收割，进入枯草阶段
             land.setGrowthCharacteristic(
                     growthCharacteristicRepository
-                            .findBySeed_IdAndCropStatus(seed.getId(), CropStatus.HARVESTED)
-                            .orElseThrow(() -> new ResourceNotFoundException("作物无枯草阶段")));
+                            .findBySeed_IdAndCropStatusOrderByGrowthStageAsc(seed.getId(), CropStatus.HARVESTED)
+                            .stream().findFirst().orElseThrow(
+                                    () -> new ResourceNotFoundException("作物无枯草阶段")
+                            ));
         }
 
         PlayerLand playerLand = playerLandRepository.save(land);
